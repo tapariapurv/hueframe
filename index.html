@@ -3,123 +3,298 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wallpaper Generator</title>
+<title>Wallpaper Studio</title>
 <style>
 *{box-sizing:border-box;margin:0}
-body{font:14px system-ui,sans-serif;background:#0d0e12;color:#e8e8ee;display:flex;height:100vh}
-aside{width:310px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:20px;background:#15161c}
-h1{font-size:18px}
-h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:8px}
-.g{display:flex;flex-wrap:wrap;gap:6px}
-button{font:inherit;color:inherit;background:#22242c;border:1px solid #2e3039;border-radius:8px;padding:7px 10px;cursor:pointer}
-button.on{background:#e8e8ee;color:#111}
-.sw{display:flex;padding:0;overflow:hidden;width:60px;height:28px}
-.sw i{flex:1}
-.sw.on,#cc.on{outline:2px solid #fff;outline-offset:2px}
-#cc{width:60px;height:28px;border:0;padding:0;background:none;cursor:pointer;border-radius:8px}
-.row{display:flex;gap:8px}
-.big{flex:1;padding:12px;font-weight:600}
-#dl{background:#7c5cff;border-color:#7c5cff;color:#fff}
-main{flex:1;display:grid;place-items:center;padding:24px;min-width:0}
-canvas{max-width:100%;max-height:calc(100vh - 48px);border-radius:12px;box-shadow:0 20px 60px #0008}
-@media(max-width:700px){body{flex-direction:column;height:auto}aside{width:auto}canvas{max-height:60vh}}
+:root{--bg:#000;--card:#141414;--hover:#1e1e1e;--text:#f0f0f0;--muted:#888;--border:#262626;--accent:#fff}
+body{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid var(--border);font-weight:700;letter-spacing:.5px}
+header span{color:var(--muted);font-weight:400;margin-left:10px}
+.app{display:grid;grid-template-columns:1fr 360px;height:calc(100vh - 52px)}
+.stage{display:flex;align-items:center;justify-content:center;padding:24px;min-width:0}
+.previews{display:flex;gap:20px;align-items:flex-end}
+figure{display:flex;flex-direction:column;gap:8px;align-items:center}
+figcaption,h2{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
+.previews canvas{height:min(46vh,calc((100vw - 460px)/3.1));border-radius:14px;border:2px solid var(--border);box-shadow:0 10px 40px #0009;display:block}
+#pP{border-radius:22px}
+aside{overflow-y:auto;padding:20px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:22px}
+section{display:flex;flex-direction:column;gap:10px}
+.styles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.styles.collapsed button:nth-child(n+10){display:none}
+.st{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:4px 4px 6px;cursor:pointer;color:var(--muted);font:inherit;font-size:11px}
+.st canvas{width:100%;aspect-ratio:16/10;border-radius:8px;display:block;margin-bottom:5px}
+.st:hover{border-color:var(--muted)}.st.on{border-color:var(--accent);color:var(--text)}
+button{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;cursor:pointer}
+button:hover{background:var(--hover)}
+.swatches{display:flex;flex-wrap:wrap;gap:7px}
+.sw{width:34px;height:34px;border-radius:50%;padding:0;border:2px solid var(--border)}
+.sw.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--bg) inset}
+.picker{display:grid;grid-template-columns:132px 1fr;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px}
+.picker.on{border-color:var(--accent)}
+.wheel{position:relative;width:132px;height:132px;touch-action:none;cursor:crosshair}
+.wheel canvas{width:132px;height:132px;border-radius:50%}
+#mark{position:absolute;width:14px;height:14px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #000a;transform:translate(-50%,-50%);pointer-events:none}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.row{display:flex;gap:6px;align-items:center}
+input[type=text],input[type=number]{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 8px;font:12px ui-monospace,Menlo,monospace}
+input[type=number]{-moz-appearance:textfield;padding:7px 4px;text-align:center}
+input::-webkit-inner-spin-button{display:none}
+#native{width:34px;height:32px;border:1px solid var(--border);border-radius:8px;background:none;padding:2px;cursor:pointer;flex:none}
+.sliders{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
+.sliders label{display:grid;grid-template-columns:14px 1fr 34px;gap:8px;align-items:center;color:var(--muted);font-size:11px}
+input[type=range]{-webkit-appearance:none;appearance:none;height:12px;border-radius:6px;width:100%}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #000;cursor:pointer}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #000}
+.seg{display:flex;gap:6px}.seg button{flex:1}.seg button.on{background:var(--text);color:var(--bg)}
+.toggles{display:flex;gap:16px;color:var(--muted)}
+.cta{background:var(--text);color:var(--bg);font-weight:700;letter-spacing:1px;padding:13px}
+.cta:hover{background:#ddd}
+.dl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.dl button{display:flex;flex-direction:column;gap:2px;padding:10px 4px}
+.dl small{color:var(--muted);font-size:10px}
+@media(max-width:860px){
+  .app{grid-template-columns:1fr;height:auto}
+  aside{border-left:0;overflow:visible}
+  .previews{flex-wrap:wrap;justify-content:center}
+  #pD{width:calc(100vw - 48px);height:auto}
+  #pT,#pP{height:44vw}
+}
 </style>
 </head>
 <body>
-<aside>
-  <h1>Wallpaper Generator</h1>
-  <div><h2>Device</h2><div class="g" id="dev"></div></div>
-  <div><h2>Style</h2><div class="g" id="style"></div></div>
-  <div><h2>Colour</h2><div class="g" id="pal"></div>
-    <div class="g" style="margin-top:6px"><input type="color" id="cc" value="#ff6a3d" title="Custom colour"><label><input type="checkbox" id="gr" checked> Film grain</label></div>
-  </div>
-  <div class="row"><button class="big" id="remix">Remix</button><button class="big" id="dl">Download</button></div>
-</aside>
-<main><canvas id="cv"></canvas></main>
+<header>WALLPAPER STUDIO<span>4K–8K wallpapers for every screen</span></header>
+<div class="app">
+  <div class="stage"><div class="previews">
+    <figure><figcaption>Desktop</figcaption><canvas id="pD"></canvas></figure>
+    <figure><figcaption>iPad</figcaption><canvas id="pT"></canvas></figure>
+    <figure><figcaption>iPhone</figcaption><canvas id="pP"></canvas></figure>
+  </div></div>
+  <aside>
+    <section><h2>Style</h2><div class="styles collapsed" id="styles"></div><button id="more"></button></section>
+    <section><h2>Colour</h2>
+      <div class="swatches" id="swatches"></div>
+      <div class="picker" id="picker">
+        <div class="wheel" id="wheel"><canvas id="wc" width="264" height="264"></canvas><div id="mark"></div></div>
+        <div class="col">
+          <div class="row"><input type="color" id="native" title="System colour picker"><button id="drop" title="Pick a colour from anywhere on screen" style="flex:1;padding:7px">Eyedropper</button></div>
+          <input type="text" id="hex" maxlength="7" spellcheck="false" aria-label="Hex">
+          <div class="row"><input type="number" id="cr" min="0" max="255" aria-label="Red"><input type="number" id="cg" min="0" max="255" aria-label="Green"><input type="number" id="cb" min="0" max="255" aria-label="Blue"></div>
+          <div class="row" style="color:var(--muted);font-size:10px;justify-content:space-around"><span>R</span><span>G</span><span>B</span></div>
+        </div>
+        <div class="sliders">
+          <label>H<input type="range" id="sh" min="0" max="360"><span id="vh"></span></label>
+          <label>S<input type="range" id="ss" min="0" max="100"><span id="vs"></span></label>
+          <label>L<input type="range" id="sl" min="0" max="100"><span id="vl"></span></label>
+        </div>
+      </div>
+    </section>
+    <section><h2>Mode</h2><div class="seg"><button id="dark" class="on">Dark</button><button id="light">Light</button></div>
+      <div class="toggles"><label><input type="checkbox" id="grain" checked> Film grain</label><label><input type="checkbox" id="clock" checked> Clock preview</label></div>
+    </section>
+    <button class="cta" id="remix">↻ GENERATE VARIATION</button>
+    <section><h2>Quality</h2><div class="seg" id="quality"></div></section>
+    <section><h2>Download</h2><div class="dl" id="dl"></div></section>
+  </aside>
+</div>
 <script>
 const $=id=>document.getElementById(id);
-const SIZES={Desktop:[3840,2160],iPhone:[1320,2868],iPad:[2064,2752]};
-const PAL={
-  Midnight:['#0b1026','#2b2d6e','#6a4fd8','#d16ba5','#ffc6a8'],
-  Sunset:['#2d1b3d','#b33f62','#f26b38','#f9a03f','#ffe3b3'],
-  Ocean:['#03223f','#035aa6','#00a6c8','#7bdff2','#e0fbfc'],
-  Forest:['#0f2018','#1f4d3a','#3f8f5f','#a3c47c','#eef3d2'],
-  Peach:['#5b2a3a','#e07a7a','#f6a89e','#ffd4b8','#fff1e6'],
-  Lavender:['#2a2340','#6c5b9e','#a68ad8','#d7c4f2','#f6effd'],
-  Mono:['#0e0e0e','#3a3a3a','#7a7a7a','#bdbdbd','#f2f2f2'],
-  Neon:['#0a0014','#ff00a0','#7a00ff','#00e5ff','#d4ff00'],
-  Desert:['#3b2418','#9c4a2a','#d98b4e','#eccb93','#f8ecd4'],
-  Mint:['#0d2b2a','#167d6e','#3fc1a5','#a8ecd4','#effcf7'],
-  Candy:['#3d1a4a','#ff6fb5','#ffb86b','#7ee0ff','#fff2a8'],
-  Ember:['#120404','#5c0f0f','#c0261c','#ff7b29','#ffd36b'],
-  Arctic:['#1b2a3a','#3e6d8e','#8fb8d6','#cfe6f5','#ffffff'],
-  Retro:['#1d3557','#e63946','#f4a261','#e9c46a','#f1faee'],
-  Rose:['#2b0f1c','#7d1d42','#c94f7c','#f2a1c0','#fde4ee'],
-  Matcha:['#1e2617','#55683a','#94a85f','#d3dba8','#f5f3e1'],
-};
-// seeded RNG (mulberry32) so Remix = new seed, same style/colours
-const rng=s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
-const pick=(p,r)=>p[r()*p.length|0];
-const circle=(c,x,y,rad,col)=>{c.fillStyle=col;c.beginPath();c.arc(x,y,rad,0,7);c.fill()};
-const lin=(c,x0,y0,x1,y1,cols)=>{const g=c.createLinearGradient(x0,y0,x1,y1);cols.forEach((k,i)=>g.addColorStop(i/(cols.length-1),k));return g};
-const wave=(c,W,y,a,f,ph)=>{for(let x=0;x<=W;x+=W/120){const t=x/W*6.28*f;c.lineTo(x,y+a*Math.sin(t+ph)+a*.4*Math.sin(t*2.3+ph*1.7))}};
+const DEV={Desktop:[3840,2160,'pD'],iPad:[2064,2752,'pT'],iPhone:[1320,2868,'pP']};
+const QUAL={'4K':1,'6K':1.5,'8K':2};
+// 4 anchors per palette, dark -> light; expanded to an 11-step ramp
+const PAL={Charcoal:['#050505','#2a2a2a','#8c8c8c','#f5f5f5'],Stone:['#1a1714','#534e47','#9f9688','#ece6dc'],Blue:['#01052b','#0825c7','#58a3ff','#edf8ff'],
+Sunrise:['#031c35','#0b4b7a','#ff7240','#fff0c8'],Fire:['#1a0000','#b30000','#ff9500','#fff1c2'],Purple:['#100014','#5c0085','#b84dff','#f7ebff'],
+Toxic:['#050807','#1e3325','#86b326','#f6ffe0'],Arctic:['#081018','#33516a','#a7c2d3','#ffffff'],Neon:['#13051a','#3b2285','#2ca1e8','#e0fbfd'],
+Forest:['#051214','#18524c','#68ba89','#c3ebd0'],Nebula:['#120414','#5c1a5c','#c85b98','#fff1f6'],Ocean:['#020c1b','#0d3b6e','#30a5b8','#d4fff2'],
+'Blood Moon':['#000000','#330000','#880000','#ff3a2a'],Peach:['#3b1f2b','#c2566b','#f4a28c','#fff1e6'],Lavender:['#1a1530','#5a4a9e','#b9a3e8','#f6effd'],
+Matcha:['#141a10','#4a5e32','#a3b86c','#f5f3e1'],Desert:['#2a160d','#8c4426','#e0a066','#faf0dc'],Candy:['#2b0f3a','#ff4fa3','#ffc46b','#fffbe6'],
+Mint:['#06201d','#167d6e','#6fdcc0','#effcf7'],Gold:['#120d02','#5c4206','#d4a017','#fff6d6'],Synth:['#0d0221','#541388','#ff2a6d','#ffd319'],
+Rose:['#1f0a14','#7d1d42','#e27aa3','#fde4ee'],Sky:['#0a1a33','#2e6bb8','#8cc8f2','#f2fbff'],Autumn:['#1a0d05','#7a2e12','#d9822b','#f7e3b5']};
 
-const STYLES={
-  Mesh(c,W,H,p,r,u){c.fillStyle=p[r()*2|0];c.fillRect(0,0,W,H);c.filter=`blur(${u*.15}px)`;for(let i=0;i<8;i++)circle(c,r()*W,r()*H,u*(.25+r()*.45),p[1+(r()*4|0)])},
-  Gradient(c,W,H,p,r){const a=r()*6.28,x=Math.cos(a)*W/2,y=Math.sin(a)*H/2;c.fillStyle=lin(c,W/2-x,H/2-y,W/2+x,H/2+y,r()<.5?p:[...p].reverse());c.fillRect(0,0,W,H);
-    c.globalCompositeOperation='soft-light';const g=c.createRadialGradient(W*(.3+r()*.4),H*(.3+r()*.4),0,W/2,H/2,Math.max(W,H));g.addColorStop(0,'#fff');g.addColorStop(1,'#000');c.fillStyle=g;c.fillRect(0,0,W,H)},
-  Aurora(c,W,H,p,r,u){c.fillStyle=lin(c,0,0,0,H,['#03040a',p[0]]);c.fillRect(0,0,W,H);
-    for(let i=0;i<200;i++){c.globalAlpha=r()*.8;circle(c,r()*W,r()*H*.7,u*.0012*(1+r()),'#fff')}
-    c.globalCompositeOperation='lighter';c.filter=`blur(${u*.04}px)`;
-    for(let i=0;i<6;i++){c.globalAlpha=.35+r()*.3;c.strokeStyle=p[1+i%4];c.lineWidth=u*(.04+r()*.12);c.beginPath();wave(c,W,H*(.15+r()*.45),u*(.05+r()*.15),.5+r()*1.5,r()*6);c.stroke()}},
-  Silk(c,W,H,p,r,u){c.fillStyle=p[0];c.fillRect(0,0,W,H);const n=70,a=u*(.1+r()*.2),f=.5+r()*1.5,ph=r()*6,dp=(r()-.5)*.06,y0=H*(.3+r()*.4),sp=u*(.004+r()*.004);
-    c.lineWidth=u*.002;c.strokeStyle=lin(c,0,0,W,H,p.slice(1));
-    for(let i=0;i<n;i++){c.globalAlpha=.2+.8*Math.sin(i/n*3.14);c.beginPath();wave(c,W,y0+(i-n/2)*sp,a,f,ph+i*dp);c.stroke()}},
-  Bokeh(c,W,H,p,r,u){c.fillStyle=lin(c,0,0,W,H,[p[0],p[1]]);c.fillRect(0,0,W,H);c.globalCompositeOperation='screen';
-    for(let l=0;l<3;l++){c.filter=`blur(${u*.012*(2-l)}px)`;for(let i=0;i<15;i++){c.globalAlpha=.15+r()*.35;circle(c,r()*W,r()*H,u*(.02+r()*.07)*(3-l)/1.5,p[2+(r()*3|0)])}}},
-  Topo(c,W,H,p,r,u){c.fillStyle=p[0];c.fillRect(0,0,W,H);const cx=r()*W,cy=r()*H,a1=r()*6,a2=r()*6,a3=r()*6,g=u*.025;c.globalAlpha=.75;
-    for(let k=1;k*g<Math.hypot(W,H);k++){const hi=k%5==0;c.strokeStyle=p[hi?4:2];c.lineWidth=u*(hi?.004:.002);c.beginPath();
-      for(let a=0;a<6.3;a+=.02){const m=1+.18*Math.sin(a*3+a1+k*.05)+.1*Math.sin(a*5+a2-k*.08)+.06*Math.sin(a*2+a3);c.lineTo(cx+Math.cos(a)*k*g*m,cy+Math.sin(a)*k*g*m)}c.closePath();c.stroke()}},
-  Bauhaus(c,W,H,p,r,u){const s=u/(3+(r()*4|0));
-    for(let y=0;y<H;y+=s)for(let x=0;x<W;x+=s){const b=pick(p,r);let f;do f=pick(p,r);while(f==b);
-      c.fillStyle=b;c.fillRect(x,y,s+1,s+1);c.save();c.beginPath();c.rect(x,y,s,s);c.clip();const t=r()*4|0,q=r()*4|0;
-      if(t==0)circle(c,x+(q&1)*s,y+(q>>1)*s,s,f);else if(t==1)circle(c,x+[s/2,s,s/2,0][q],y+[0,s/2,s,s/2][q],s/2,f);else if(t==2)circle(c,x+s/2,y+s/2,s*.38,f);c.restore()}},
-  Dunes(c,W,H,p,r,u){c.fillStyle=lin(c,0,0,0,H,[p[2],p[4]]);c.fillRect(0,0,W,H);
-    c.save();c.shadowColor='#fff';c.shadowBlur=u*.1;c.globalAlpha=.9;circle(c,W*(.2+r()*.6),H*(.2+r()*.2),u*(.06+r()*.08),'#fff');c.restore();
-    for(let i=0;i<4;i++){c.fillStyle=p[3-i];c.beginPath();c.moveTo(0,H);wave(c,W,H*(.45+i*.13),u*(.03+r()*.05),.5+r()*1.2,r()*6);c.lineTo(W,H);c.fill()}},
-  Retro(c,W,H,p,r,u){c.fillStyle=p[4];c.fillRect(0,0,W,H);const cx=W*(.2+r()*.6),cy=H*(r()<.5?1:.5+r()*.3),b=u*(.06+r()*.05),R0=u*(.15+r()*.2);
-    for(let k=4;k>0;k--)circle(c,cx,cy,R0+k*b,p[k-1]);circle(c,cx,cy,R0,p[4])},
-};
+const S={style:0,pal:'Sunrise',seed:Math.random()*1e9|0,inv:false,q:'4K',hsl:[18,100,63]};
+
+// ---------- colour maths ----------
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+const rgb2hex=a=>'#'+a.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+const hsl2rgb=(h,s,l)=>{h=(h%360+360)%360;s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l);return[0,8,4].map(n=>255*(l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1))))};
+const rgb2hsl=(r,g,b)=>{r/=255;g/=255;b/=255;const M=Math.max(r,g,b),m=Math.min(r,g,b),d=M-m,l=(M+m)/2,s=d?d/(1-Math.abs(2*l-1)):0,h=!d?0:M==r?((g-b)/d+6)%6:M==g?(b-r)/d+2:(r-g)/d+4;return[h*60,s*100,l*100]};
+const lerp=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+function ramp(name){
+  if(name=='Custom'){const[h,s,l]=S.hsl,L=Math.min(.9,Math.max(.1,l/100));
+    // ramp passes exactly through the picked colour at t=L
+    return Array.from({length:11},(_,i)=>{const t=i/10,lt=t<L?4+(l-4)*t/L:l+(97-l)*(t-L)/(1-L);return hsl2rgb(S.hsl[0]+(t-L)*25,s*(1-.35*Math.abs(t-L)),Math.min(98,Math.max(2,lt)))})}
+  const A=PAL[name].map(hex2rgb);return Array.from({length:11},(_,i)=>{const x=i/10*3,j=Math.min(2,x|0);return lerp(A[j],A[j+1],x-j)})}
+let RAMP;
+function col(t,a){t=Math.min(1,Math.max(0,S.inv?1-t:t))*10;const i=Math.min(9,t|0),[r,g,b]=lerp(RAMP[i],RAMP[i+1],t-i).map(Math.round);return a==null?`rgb(${r} ${g} ${b})`:`rgb(${r} ${g} ${b}/${a})`}
+
+// ---------- drawing helpers ----------
+const rng=s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const lg=(c,x0,y0,x1,y1,s)=>{const g=c.createLinearGradient(x0,y0,x1,y1);s.forEach((k,i)=>g.addColorStop(i/(s.length-1),k));return g};
+const dot=(c,x,y,r,f)=>{c.fillStyle=f;c.beginPath();c.arc(x,y,Math.max(r,0),0,7);c.fill()};
+const fill=(K,f)=>{K.c.fillStyle=f;K.c.fillRect(0,0,K.W,K.H)};
+const sky=(K,a,b)=>fill(K,lg(K.c,0,0,0,K.H,[col(a),col(b)]));
+const glow=(K,x,y,R,t)=>{const g=K.c.createRadialGradient(x,y,0,x,y,R);g.addColorStop(0,col(t,.85));g.addColorStop(1,col(t,0));fill(K,g)};
+const stars=(K,n,maxY)=>{for(let i=0;i<n;i++)dot(K.c,K.r()*K.W,K.r()*K.H*maxY,K.u*.0013*(.4+K.r()),col(1,K.r()*.9))};
+const ridge=(K,f,style)=>{const{c,W,H}=K;c.fillStyle=style;c.beginPath();c.moveTo(0,H);for(let x=0;x<=W+W/500;x+=W/500)c.lineTo(x,f(x/W));c.lineTo(W,H);c.fill()};
+const wave=(c,W,y,a,f,ph)=>{for(let x=0;x<=W;x+=W/150){const t=x/W*6.28*f;c.lineTo(x,y+a*Math.sin(t+ph)+a*.4*Math.sin(t*2.3+ph*1.7))}};
+const shadow=(c,u,a=.35,dy=0)=>{c.shadowColor=`rgb(0 0 0/${a})`;c.shadowBlur=u*.035;c.shadowOffsetY=dy*u};
+
+// ---------- styles (first 9 shown, rest behind "see more") ----------
+const STY=[
+['Hills',K=>{const{c,W,H,u,r,n1}=K;sky(K,.12,.5);const x=W*(.2+r()*.6),y=H*(.25+r()*.12);glow(K,x,y,u*.5,.85);dot(c,x,y,u*.055,col(.97));
+  for(let i=0;i<6;i++){const o=r()*99;ridge(K,t=>H*(.45+i*.085)+n1(t*(1.6+i*.5)+o)*u*(.32-i*.03),col(.44-i*.075))}}],
+['Mountains',K=>{const{c,W,H,u,r,n1}=K;sky(K,.05,.5);const x=W*(.15+r()*.7),y=H*(.15+r()*.12);glow(K,x,y,u*.35,.75);dot(c,x,y,u*.045,col(.97));
+  for(let i=0;i<5;i++){const o=r()*99;ridge(K,t=>H*(.52+i*.1)-Math.abs(n1(t*(2+i*.8)+o,8))*u*(.9-i*.13),col(.46-i*.09))}}],
+['Forest',K=>{const{c,W,H,u,r,n1}=K;sky(K,.1,.5);const sx=W*(.2+r()*.6),sy=H*(.2+r()*.1);glow(K,sx,sy,u*.45,.85);dot(c,sx,sy,u*.05,col(.97));
+  for(let i=0;i<5;i++){const cl=col(.46-i*.09),o=r()*99,f=t=>H*(.5+i*.1)+n1(t*(1.5+i*.4)+o)*u*.22,s=u*(.022+i*.01);ridge(K,f,cl);c.fillStyle=cl;c.beginPath();
+    for(let x=-s;x<W+s;x+=s*(.4+r()*.6)){const y=f(x/W)+s*.4,h=s*(2.2+r()*1.6);for(let k=0;k<3;k++){const ty=y-h*k*.27,w=s*(.6-k*.15);c.moveTo(x,ty-h*.46);c.lineTo(x+w,ty);c.lineTo(x-w,ty)}}c.fill()}}],
+['Waves',K=>{const{c,H,u,r}=K;const f=.5+r()*1.2,ph=r()*6,a=u*(.03+r()*.05);shadow(c,u,.4,-.006);
+  for(let i=0;i<9;i++){const y0=H*(.1+i*.1);ridge(K,x=>y0+a*Math.sin(x*6.28*f+ph+i*.7)+a*.5*Math.sin(x*14+ph*2+i),col(.12+i*.1))}}],
+['Dunes',K=>{const{c,W,H,u,r}=K;sky(K,.3,.75);const x=W*(.2+r()*.6),y=H*(.25+r()*.1);glow(K,x,y,u*.45,.98);dot(c,x,y,u*.065,col(1));
+  for(let i=0;i<5;i++){const y0=H*(.5+i*.11),a=u*(.04+r()*.05),f=.4+r()*.8,ph=r()*6,t=.62-i*.13;ridge(K,x=>y0+a*Math.sin(x*6.28*f+ph)+a*.3*Math.sin(x*17+ph),lg(c,0,y0-a,W*.6,y0+a*4,[col(t+.14),col(t),col(t-.1)]))}}],
+['Arcs',K=>{const{c,W,H,u,r}=K;const cx=W*(.15+r()*.7),cy=H*(r()<.5?1.02:.75+r()*.2),n=8+(r()*6|0),st=Math.hypot(W,H)*1.05/n;shadow(c,u,.35);
+  for(let k=n;k>0;k--)dot(c,cx,cy,k*st,col(.08+.9*(1-k/n)))}],
+['Mesh',K=>{const{c,W,H,u,r}=K;fill(K,col(.15));c.filter=`blur(${u*.14}px)`;for(let i=0;i<9;i++)dot(c,r()*W,r()*H,u*(.2+r()*.4),col(.15+r()*.85))}],
+['Aurora',K=>{const{c,W,H,u,r,n1}=K;sky(K,0,.22);stars(K,260,.8);c.globalCompositeOperation='lighter';c.filter=`blur(${u*.035}px)`;
+  for(let i=0;i<7;i++){const o=r()*99,y0=H*(.2+r()*.35),a=u*(.25+r()*.3);c.strokeStyle=col(.55+r()*.45,.35);c.lineWidth=u*(.03+r()*.1);c.beginPath();for(let x=-.1;x<=1.1;x+=.005)c.lineTo(x*W,y0+n1(x*2+o,3)*a);c.stroke()}
+  c.globalCompositeOperation='source-over';c.filter='none';ridge(K,x=>H*.86+n1(x*3+r()*9)*u*.14,col(.02))}],
+['Silk',K=>{const{c,W,H,u,r}=K;fill(K,col(.04));const n=80,a=u*(.1+r()*.2),f=.5+r(),ph=r()*6,dp=(r()-.5)*.05,y0=H*(.35+r()*.3),sp=u*(.003+r()*.004);
+  c.lineWidth=u*.0018;c.strokeStyle=lg(c,0,0,W,H,[col(.35),col(.7),col(1)]);for(let i=0;i<n;i++){c.globalAlpha=.15+.85*Math.sin(i/n*3.14);c.beginPath();wave(c,W,y0+(i-n/2)*sp,a*(1+i/n*.5),f,ph+i*dp);c.stroke()}}],
+['Topo',K=>{const{c,W,H,u,r}=K;fill(K,col(.05));const cx=r()*W,cy=r()*H,a1=r()*6,a2=r()*6,a3=r()*6,g=u*.025;c.globalAlpha=.8;
+  for(let k=1;k*g*.7<Math.hypot(W,H);k++){const hi=k%5==0;c.strokeStyle=col(hi?.75:.35);c.lineWidth=u*(hi?.0035:.0018);c.beginPath();
+    for(let a=0;a<6.3;a+=.015){const m=1+.18*Math.sin(a*3+a1+k*.05)+.1*Math.sin(a*5+a2-k*.08)+.06*Math.sin(a*2+a3);c.lineTo(cx+Math.cos(a)*k*g*m,cy+Math.sin(a)*k*g*m)}c.closePath();c.stroke()}}],
+['Bokeh',K=>{const{c,W,H,u,r}=K;fill(K,lg(c,0,0,W,H,[col(.02),col(.28)]));c.globalCompositeOperation='screen';
+  for(let l=0;l<3;l++){c.filter=`blur(${u*.012*(2-l)}px)`;for(let i=0;i<16;i++){c.globalAlpha=.15+r()*.35;dot(c,r()*W,r()*H,u*(.02+r()*.07)*(3-l)/1.5,col(.5+r()*.5))}}}],
+['Bauhaus',K=>{const{c,W,H,u,r}=K;const s=u/(3+(r()*4|0)),q=()=>col((r()*5|0)/4*.9+.05);
+  for(let y=0;y<H;y+=s)for(let x=0;x<W;x+=s){const b=q();let f;do f=q();while(f==b);c.fillStyle=b;c.fillRect(x,y,s+1,s+1);c.save();c.beginPath();c.rect(x,y,s,s);c.clip();const t=r()*4|0,k=r()*4|0;
+    if(t==0)dot(c,x+(k&1)*s,y+(k>>1)*s,s,f);else if(t==1)dot(c,x+[s/2,s,s/2,0][k],y+[0,s/2,s,s/2][k],s/2,f);else if(t==2)dot(c,x+s/2,y+s/2,s*.38,f);c.restore()}}],
+['Synthwave',K=>{const{c,W,H,u,r}=K;const hz=H*.62,sk=lg(c,0,0,0,hz,[col(0),col(.45)]),sx=W*(.3+r()*.4),R=u*.28,sy=hz-R*.3;c.fillStyle=sk;c.fillRect(0,0,W,hz);stars(K,120,.45);glow(K,sx,sy,R*2.2,.75);
+  dot(c,sx,sy,R,lg(c,0,sy-R,0,sy+R,[col(1),col(.62)]));c.fillStyle=sk;for(let k=0;k<7;k++)c.fillRect(sx-R,sy+R*(.05+k*.14),2*R,R*(.015+k*.018));
+  c.fillStyle=lg(c,0,hz,0,H,[col(.06),col(.22)]);c.fillRect(0,hz,W,H-hz);c.strokeStyle=col(.85,.85);c.lineWidth=u*.0022;c.shadowColor=col(.9);c.shadowBlur=u*.012;c.beginPath();
+  for(let k=1;k<30;k++){const y=hz+(H-hz)*Math.pow(k/14,2.2);if(y>H)break;c.moveTo(0,y);c.lineTo(W,y)}c.moveTo(0,hz);c.lineTo(W,hz);
+  for(let k=-40;k<=40;k++){c.moveTo(sx+k*u*.03,hz);c.lineTo(sx+k*u*.4,H)}c.stroke()}],
+['Night',K=>{const{c,W,H,u,r,n1}=K;sky(K,0,.38);stars(K,450,.8);const x=W*(.15+r()*.7),y=H*(.15+r()*.2);glow(K,x,y,u*.32,.9);dot(c,x,y,u*.045,col(1));
+  const o=r()*9;ridge(K,t=>H*.72+n1(t*2+o)*u*.25,col(.14));ridge(K,t=>H*.84+n1(t*3+o+5)*u*.18,col(.04))}],
+['Ripples',K=>{const{c,W,H,u,r}=K;fill(K,col(.03));c.globalCompositeOperation='lighter';c.lineWidth=u*.004;const g=u*.022,D=Math.hypot(W,H);
+  for(let j=0;j<2;j++){const cx=r()*W,cy=r()*H;c.strokeStyle=col(.55+j*.35,.55);for(let k=1;k*g<D;k++){c.beginPath();c.arc(cx,cy,k*g,0,7);c.stroke()}}}],
+['Nested',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.04));const cx=W*(.3+r()*.4),cy=H*(.3+r()*.4),o=r()*99,D=Math.hypot(W,H);shadow(c,u,.45);
+  for(let k=12;k>0;k--){const R=D*.62*k/12;c.fillStyle=col(.08+.9*(1-k/12));c.beginPath();for(let a=0;a<6.29;a+=.02){const m=R*(1+.45*n2(Math.cos(a)*1.3+o+k*.06,Math.sin(a)*1.3+o));c.lineTo(cx+Math.cos(a)*m,cy+Math.sin(a)*m)}c.fill()}}],
+['Spheres',K=>{const{c,W,H,u,r}=K;fill(K,lg(c,0,0,0,H,[col(.04),col(.22)]));shadow(c,u,.5,.015);const B=[];for(let i=0;i<14;i++)B.push([r()*W,r()*H,u*(.03+r()*r()*.25),r()]);B.sort((a,b)=>a[2]-b[2]);
+  for(const[x,y,R,t]of B){const g=c.createRadialGradient(x-R*.35,y-R*.4,R*.05,x,y,R);g.addColorStop(0,col(1));g.addColorStop(.5,col(.35+t*.5));g.addColorStop(1,col(.1+t*.3));dot(c,x,y,R,g)}}],
+['Papercut',K=>{const{c,H,u,r,n1}=K;fill(K,col(.95));shadow(c,u,.4,-.008);for(let i=0;i<10;i++){const o=r()*99,y0=H*(.06+i*.1);ridge(K,x=>y0+n1(x*(1.2+r()*.01)+o,4)*u*.3,col(.9-i*.09))}}],
+['Halftone',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.04));const s=u*.024,o=r()*9;for(let y=s/2;y<H;y+=s)for(let x=s/2;x<W;x+=s){const v=Math.min(1,Math.max(0,n2(x/u*2+o,y/u*2)*1.4+.5));dot(c,x,y,s*.48*v,col(.25+.75*v))}}],
+['Flow',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.03));c.lineWidth=u*.0016;c.lineCap='round';const o=r()*9;
+  for(let i=0;i<900;i++){let x=r()*W,y=r()*H;c.strokeStyle=col(.3+r()*.7,.65);c.beginPath();c.moveTo(x,y);for(let s=0;s<60;s++){const a=n2(x/u*1.4+o,y/u*1.4)*10;x+=Math.cos(a)*u*.006;y+=Math.sin(a)*u*.006;c.lineTo(x,y)}c.stroke()}}],
+['Gradient',K=>{const{c,W,H,r}=K;const a=r()*6.28,x=Math.cos(a)*W/2,y=Math.sin(a)*H/2;fill(K,lg(c,W/2-x,H/2-y,W/2+x,H/2+y,[col(0),col(.3),col(.65),col(.95)]));
+  c.globalCompositeOperation='soft-light';const g=c.createRadialGradient(W*(.2+r()*.6),H*(.2+r()*.6),0,W/2,H/2,Math.max(W,H));g.addColorStop(0,'#fff');g.addColorStop(1,'#000');fill(K,g)}],
+['Low Poly',K=>{const{c,W,H,u,r,n2}=K;const cs=Math.ceil(8*W/u),rs=Math.ceil(8*H/u),sx=W/cs,sy=H/rs,P=[];
+  for(let j=0;j<=rs;j++)for(let i=0;i<=cs;i++)P.push([i*sx+(i%cs?(r()-.5)*sx*.8:0),j*sy+(j%rs?(r()-.5)*sy*.8:0)]);
+  const tri=(a,b,d)=>{const mx=(a[0]+b[0]+d[0])/3,my=(a[1]+b[1]+d[1])/3,t=(1-my/H)*.75+n2(mx/u*2,my/u*2)*.6+.1;c.fillStyle=c.strokeStyle=col(t);c.beginPath();c.moveTo(...a);c.lineTo(...b);c.lineTo(...d);c.fill();c.stroke()};
+  for(let j=0;j<rs;j++)for(let i=0;i<cs;i++){const p=j*(cs+1)+i,a=P[p],b=P[p+1],d=P[p+cs+1],e=P[p+cs+2];if(r()<.5){tri(a,b,e);tri(a,e,d)}else{tri(a,b,d);tri(b,e,d)}}}],
+['Planet',K=>{const{c,W,H,u,r}=K;sky(K,0,.15);stars(K,350,1);const x=W*(.3+r()*.4),y=H*(.35+r()*.3),R=u*(.22+r()*.12),tilt=-.35+r()*.7;glow(K,x,y,R*1.9,.55);
+  const ring=(a0,a1)=>{c.save();c.translate(x,y);c.rotate(tilt);c.scale(1,.24);c.strokeStyle=col(.8,.75);c.lineWidth=R*.14;c.beginPath();c.arc(0,0,R*1.65,a0,a1);c.stroke();c.restore()};
+  ring(Math.PI,2*Math.PI);const g=c.createRadialGradient(x-R*.4,y-R*.4,R*.1,x,y,R);g.addColorStop(0,col(.92));g.addColorStop(.6,col(.45));g.addColorStop(1,col(.08));dot(c,x,y,R,g);ring(0,Math.PI)}],
+['Rays',K=>{const{c,W,H,u,r}=K;const cx=W*(.2+r()*.6),cy=H*(r()<.5?1.02:.4+r()*.3),n=20+(r()*20|0),D=Math.hypot(W,H)*1.5;
+  for(let k=0;k<n;k++){c.fillStyle=col(k%2?.12:.24);c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,D,k/n*6.2832,(k+1)/n*6.2832+.002);c.fill()}glow(K,cx,cy,u*.9,.75);dot(c,cx,cy,u*.07,col(1))}],
+['City',K=>{const{c,W,H,u,r}=K;sky(K,.04,.48);stars(K,150,.5);const x0=W*(.1+r()*.8),y0=H*(.12+r()*.15);glow(K,x0,y0,u*.3,.9);dot(c,x0,y0,u*.04,col(1));
+  for(let l=0;l<3;l++)for(let x=-u*.02;x<W;){const w=u*(.04+r()*.07),h=u*(.12+r()*.4)*(1.25-l*.25)+H*.12;c.fillStyle=col(.34-l*.14);c.fillRect(x,H-h,w,h);
+    if(l){const ws=w/5;for(let y=H-h+ws;y<H-ws;y+=ws*1.6)for(let k=0;k<2;k++)if(r()<.35){c.fillStyle=col(.95,.85);c.fillRect(x+ws*(1+k*2),y,ws,ws*.8)}}x+=w+u*.004}}],
+['Clouds',K=>{const{c,W,H,u,r}=K;sky(K,.25,.65);const x=W*(.2+r()*.6),y=H*(.2+r()*.1);glow(K,x,y,u*.5,.98);
+  for(let l=0;l<6;l++){const y0=H*(.38+l*.12),cl=col(.92-l*.13);for(let x=-u*.1;x<W+u*.1;x+=u*(.05+r()*.06))dot(c,x,y0+(r()-.5)*u*.05,u*(.06+r()*.07),cl);c.fillRect(0,y0,W,H-y0)}}],
+['Folds',K=>{const{c,W,H,r}=K;const D=Math.hypot(W,H),n=6+(r()*8|0),w=D/n;c.translate(W/2,H/2);c.rotate((r()-.5)*1.4+(r()<.5?0:1.57));
+  for(let k=0;k<n;k++){const x=-D/2+k*w,t=k/n*.8+.08;c.fillStyle=lg(c,x,0,x+w,0,[col(t),col(t+.16)]);c.fillRect(x,-D/2,w+1,D)}}],
+['Mosaic',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.02));const s=u/(10+(r()*12|0)),g=s*.06,o=r()*9;
+  for(let y=0;y<H;y+=s)for(let x=0;x<W;x+=s){const v=Math.min(1,Math.max(0,n2(x/u*2+o,y/u*2)*1.4+.5));c.fillStyle=col(Math.round(v*6)/6*.85+.1);c.fillRect(x+g,y+g,s-2*g,s-2*g)}}],
+['Horizon',K=>{const{c,W,H,u,r}=K;const hz=H*(.55+r()*.15),sx=W*(.3+r()*.4),R=u*.075;c.fillStyle=lg(c,0,0,0,hz,[col(.08),col(.55),col(.88)]);c.fillRect(0,0,W,hz);
+  glow(K,sx,hz,u*.55,.95);dot(c,sx,hz-R*.35,R,col(1));c.fillStyle=lg(c,0,hz,0,H,[col(.45),col(.06)]);c.fillRect(0,hz,W,H-hz);
+  for(let k=0;k<70;k++){const t=k/70,y=hz+(H-hz)*t**1.5,w=R*(1.5+t*5)*(.4+r());c.fillStyle=col(.97,.7*(1-t));c.fillRect(sx-w/2+(r()-.5)*R*t*3,y,w,u*.003*(1+t*3))}}],
+['Spiral',K=>{const{c,W,H,u,r}=K;fill(K,col(.04));const cx=W*(.3+r()*.4),cy=H*(.3+r()*.4),n=1600,s=Math.hypot(W,H)*.62/Math.sqrt(n),ga=2.39996+(r()-.5)*.004;
+  for(let i=0;i<n;i++){const a=i*ga,d=s*Math.sqrt(i);dot(c,cx+Math.cos(a)*d,cy+Math.sin(a)*d,s*.36*(.3+i/n),col(.97-.75*i/n))}}],
+];
 
 let noise;
 function grain(c,W,H){if(!noise){noise=document.createElement('canvas');noise.width=noise.height=256;const x=noise.getContext('2d'),d=x.createImageData(256,256);
   for(let i=0;i<d.data.length;i+=4){d.data[i]=d.data[i+1]=d.data[i+2]=Math.random()*255;d.data[i+3]=255}x.putImageData(d,0,0)}
-  c.globalAlpha=.07;c.globalCompositeOperation='overlay';c.fillStyle=c.createPattern(noise,'repeat');c.fillRect(0,0,W,H)}
+  c.globalAlpha=.06;c.globalCompositeOperation='overlay';c.fillStyle=c.createPattern(noise,'repeat');c.fillRect(0,0,W,H)}
 
-// custom colour -> 5-tone palette built around its hue
-function fromHex(h){const[r,g,b]=[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255),M=Math.max(r,g,b),d=M-Math.min(r,g,b),
-  hu=60*(!d?0:M==r?(g-b)/d%6:M==g?(b-r)/d+2:(r-g)/d+4);
-  return[[0,55,12],[-20,65,32],[0,75,52],[25,80,70],[40,90,90]].map(([o,s,l])=>`hsl(${hu+o} ${s}% ${l}%)`)}
+function draw(cv,W,H,style=S.style){
+  cv.width=W;cv.height=H;const c=cv.getContext('2d'),r=rng(S.seed),tb=Array.from({length:512},r);
+  const vn=x=>{const i=Math.floor(x),f=x-i,s=f*f*(3-2*f);return tb[i&511]+(tb[(i+1)&511]-tb[i&511])*s};
+  const n1=(x,o=5)=>{let v=0,a=.5;for(let k=0;k<o;k++){v+=a*(vn(x)-.5);x=x*2+17.3;a*=.5}return v};
+  const h=(i,j)=>tb[(i+j*57)&511];
+  const vn2=(x,y)=>{const i=Math.floor(x),j=Math.floor(y),f=x-i,g=y-j,s=f*f*(3-2*f),t=g*g*(3-2*g),a=h(i,j)+(h(i+1,j)-h(i,j))*s,b=h(i,j+1)+(h(i+1,j+1)-h(i,j+1))*s;return a+(b-a)*t};
+  const n2=(x,y)=>(vn2(x,y)-.5)*.6+(vn2(x*2+5,y*2+3)-.5)*.3+(vn2(x*4+9,y*4+1)-.5)*.15;
+  const K={c,W,H,u:Math.min(W,H),r,n1,n2};
+  c.save();fill(K,col(0));STY[style][1](K);c.restore();
+  if($('grain').checked){c.save();grain(c,W,H);c.restore()}
+  return c}
 
-const S={dev:'Desktop',style:'Mesh',pal:'Midnight',seed:Math.random()*1e9|0};
-function draw(cv,scale){const[w,h]=SIZES[S.dev],W=cv.width=Math.round(w*scale),H=cv.height=Math.round(h*scale),c=cv.getContext('2d');
-  c.save();STYLES[S.style](c,W,H,S.pal=='Custom'?fromHex($('cc').value):PAL[S.pal],rng(S.seed),Math.min(W,H));c.restore();
-  if($('gr').checked){c.save();grain(c,W,H);c.restore()}}
+function clock(c,W,H,kind){
+  const p=c.getImageData(W/2|0,H*.2|0,1,1).data,dark=p[0]*.3+p[1]*.59+p[2]*.11>150,d=new Date();
+  c.fillStyle=dark?'rgba(0,0,0,.75)':'rgba(255,255,255,.92)';c.textAlign='center';c.textBaseline='middle';
+  const time=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false}),date=d.toLocaleDateString([],{weekday:'long',day:'numeric',month:'long'});
+  const D=kind=='Desktop',f='-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif';
+  c.font=`500 ${H*(D?.04:.02)}px ${f}`;c.fillText(date,W/2,H*(D?.12:.11));
+  c.font=`700 ${H*(D?.17:.1)}px ${f}`;c.fillText(time,W/2,H*(D?.24:.19))}
 
-function ui(id,keys,key,html=k=>k,cls=''){const el=$(id);el.innerHTML=keys.map(k=>`<button data-k="${k}" title="${k}" class="${cls} ${S[key]==k?'on':''}">${html(k)}</button>`).join('');
-  el.onclick=e=>{const b=e.target.closest('button');if(b){S[key]=b.dataset.k;render()}}}
-function render(){
-  ui('dev',Object.keys(SIZES),'dev',k=>`${k} <small>${SIZES[k].join('×')}</small>`);
-  ui('style',Object.keys(STYLES),'style');
-  ui('pal',Object.keys(PAL),'pal',k=>PAL[k].map(c=>`<i style="background:${c}"></i>`).join(''),'sw');
-  $('cc').classList.toggle('on',S.pal=='Custom');
-  draw($('cv'),Math.min(1,1200/Math.max(...SIZES[S.dev])));
-}
-$('cc').oninput=()=>{S.pal='Custom';render()};
-$('gr').onchange=render;
-$('remix').onclick=()=>{S.seed=Math.random()*1e9|0;render()};
-$('dl').onclick=()=>{const btn=$('dl');btn.textContent='Rendering…';setTimeout(()=>{const cv=document.createElement('canvas');draw(cv,1);
-  cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`wallpaper-${S.style}-${S.dev}-${S.seed}.png`.toLowerCase();a.click();btn.textContent='Download'})},30)};
+// ---------- UI ----------
+let thumbsDirty=true,queued=false;
+function render(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;
+  RAMP=ramp(S.pal);const dpr=Math.min(2,devicePixelRatio||1);
+  for(const k in DEV){const[w,h,id]=DEV[k],cv=$(id),ph=(cv.clientHeight||300)*dpr,c=draw(cv,Math.round(w*ph/h),Math.round(ph));if($('clock').checked)clock(c,cv.width,cv.height,k)}
+  if(thumbsDirty)[...$('styles').children].forEach((b,i)=>draw(b.firstChild,200,125,i));
+  [...$('styles').children].forEach((b,i)=>b.classList.toggle('on',i==S.style));
+  [...$('swatches').children].forEach(b=>b.classList.toggle('on',b.title==S.pal));
+  $('picker').classList.toggle('on',S.pal=='Custom');
+  thumbsDirty=false})}
+const set=(o,thumbs=true)=>{Object.assign(S,o);thumbsDirty||=thumbs;render()};
+
+$('styles').innerHTML=STY.map(s=>`<button class="st"><canvas width="200" height="125"></canvas>${s[0]}</button>`).join('');
+$('styles').onclick=e=>{const b=e.target.closest('.st');if(b)set({style:[...$('styles').children].indexOf(b)},false)};
+const more=()=>{const c=$('styles').classList.contains('collapsed');$('more').textContent=c?`See all ${STY.length} styles ▾`:'Show fewer ▴'};
+$('more').onclick=()=>{$('styles').classList.toggle('collapsed');more()};more();
+
+$('swatches').innerHTML=Object.keys(PAL).map(k=>`<button class="sw" title="${k}" style="background:linear-gradient(135deg,${PAL[k].join(',')})"></button>`).join('');
+$('swatches').onclick=e=>{const b=e.target.closest('.sw');if(b)set({pal:b.title})};
+
+// colour picker: S.hsl is the source of truth, every control syncs from it
+const wc=$('wc').getContext('2d');
+if(wc.createConicGradient){const g=wc.createConicGradient(0,132,132);for(let i=0;i<=12;i++)g.addColorStop(i/12,`hsl(${i*30} 100% 50%)`);wc.fillStyle=g;wc.fillRect(0,0,264,264)}
+{const g=wc.createRadialGradient(132,132,0,132,132,132);g.addColorStop(0,'#fff');g.addColorStop(1,'rgb(255 255 255/0)');wc.fillStyle=g;wc.fillRect(0,0,264,264)}
+function setColor(hsl,from){
+  S.hsl=hsl.map(v=>Math.round(v*10)/10);const[h,s,l]=S.hsl,rgb=hsl2rgb(h,s,l).map(Math.round),hex=rgb2hex(rgb);
+  if(from!='hex')$('hex').value=hex;if(from!='rgb')['cr','cg','cb'].forEach((id,i)=>$(id).value=rgb[i]);$('native').value=hex;
+  [['sh',h],['ss',s],['sl',l]].forEach(([id,v])=>{$(id).value=v;$('v'+id[1]).textContent=Math.round(v)});
+  $('sh').style.background='linear-gradient(90deg,'+[0,60,120,180,240,300,360].map(x=>`hsl(${x} ${s}% ${l}%)`)+')';
+  $('ss').style.background=`linear-gradient(90deg,hsl(${h} 0% ${l}%),hsl(${h} 100% ${l}%))`;
+  $('sl').style.background=`linear-gradient(90deg,#000,hsl(${h} ${s}% 50%),#fff)`;
+  const a=h*Math.PI/180;Object.assign($('mark').style,{left:66+Math.cos(a)*s/100*66+'px',top:66+Math.sin(a)*s/100*66+'px',background:hex});
+  if(from)set({pal:'Custom'})}
+const fromRGB=(rgb,from)=>setColor(rgb2hsl(...rgb),from);
+$('hex').oninput=e=>{let v=e.target.value.trim();if(v[0]!='#')v='#'+v;if(/^#[0-9a-f]{3}$/i.test(v))v='#'+[...v.slice(1)].map(x=>x+x).join('');if(/^#[0-9a-f]{6}$/i.test(v))fromRGB(hex2rgb(v),'hex')};
+['cr','cg','cb'].forEach(id=>$(id).oninput=()=>fromRGB(['cr','cg','cb'].map(i=>Math.min(255,Math.max(0,+$(i).value||0))),'rgb'));
+['sh','ss','sl'].forEach(id=>$(id).oninput=()=>setColor(['sh','ss','sl'].map(i=>+$(i).value),'slider'));
+$('native').oninput=e=>fromRGB(hex2rgb(e.target.value),'native');
+const wheel=e=>{const b=$('wheel').getBoundingClientRect(),dx=e.clientX-b.left-66,dy=e.clientY-b.top-66;setColor([(Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(100,Math.hypot(dx,dy)/66*100),S.hsl[2]],'wheel')};
+$('wheel').onpointerdown=e=>{$('wheel').setPointerCapture(e.pointerId);wheel(e);$('wheel').onpointermove=wheel};
+$('wheel').onpointerup=()=>$('wheel').onpointermove=null;
+// EyeDropper samples anywhere on screen (Chromium); elsewhere fall back to the OS picker, which has its own eyedropper
+$('drop').onclick=async()=>{if(!window.EyeDropper)return $('native').click();try{fromRGB(hex2rgb((await new EyeDropper().open()).sRGBHex),'drop')}catch{}};
+setColor(S.hsl);
+
+$('dark').onclick=()=>{$('dark').classList.add('on');$('light').classList.remove('on');set({inv:false})};
+$('light').onclick=()=>{$('light').classList.add('on');$('dark').classList.remove('on');set({inv:true})};
+$('grain').onchange=()=>set({});$('clock').onchange=()=>set({},false);
+$('remix').onclick=()=>set({seed:Math.random()*1e9|0});
+
+function dlButtons(){const q=QUAL[S.q];$('dl').innerHTML=Object.keys(DEV).map(k=>`<button data-k="${k}">${k}<small>${Math.round(DEV[k][0]*q)}×${Math.round(DEV[k][1]*q)}</small></button>`).join('');
+  $('quality').innerHTML=Object.keys(QUAL).map(k=>`<button class="${k==S.q?'on':''}">${k}</button>`).join('')}
+$('quality').onclick=e=>{if(e.target.tagName=='BUTTON'){S.q=e.target.textContent;dlButtons()}};
+$('dl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,q=QUAL[S.q],old=b.innerHTML;b.textContent='Rendering…';
+  setTimeout(()=>{const cv=document.createElement('canvas');draw(cv,Math.round(DEV[k][0]*q),Math.round(DEV[k][1]*q));
+    cv.toBlob(blob=>{if(!blob){b.textContent='Too large for this browser — try 4K';return setTimeout(()=>b.innerHTML=old,3000)}
+      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`wallpaper-${STY[S.style][0]}-${k}-${S.q}-${S.seed}.png`.toLowerCase().replace(/ /g,'-');a.click();b.innerHTML=old},'image/png')},30)};
+dlButtons();
+addEventListener('resize',()=>set({},false));
 render();
 </script>
 </body>
