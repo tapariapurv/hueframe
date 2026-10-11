@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wallpaper Generator</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{font:14px system-ui,sans-serif;background:#0d0e12;color:#e8e8ee;display:flex;height:100vh}
+aside{width:310px;padding:20px;overflow:auto;display:flex;flex-direction:column;gap:20px;background:#15161c}
+h1{font-size:18px}
+h2{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:#888;margin-bottom:8px}
+.g{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;color:inherit;background:#22242c;border:1px solid #2e3039;border-radius:8px;padding:7px 10px;cursor:pointer}
+button.on{background:#e8e8ee;color:#111}
+.sw{display:flex;padding:0;overflow:hidden;width:60px;height:28px}
+.sw i{flex:1}
+.sw.on,#cc.on{outline:2px solid #fff;outline-offset:2px}
+#cc{width:60px;height:28px;border:0;padding:0;background:none;cursor:pointer;border-radius:8px}
+.row{display:flex;gap:8px}
+.big{flex:1;padding:12px;font-weight:600}
+#dl{background:#7c5cff;border-color:#7c5cff;color:#fff}
+main{flex:1;display:grid;place-items:center;padding:24px;min-width:0}
+canvas{max-width:100%;max-height:calc(100vh - 48px);border-radius:12px;box-shadow:0 20px 60px #0008}
+@media(max-width:700px){body{flex-direction:column;height:auto}aside{width:auto}canvas{max-height:60vh}}
+</style>
+</head>
+<body>
+<aside>
+  <h1>Wallpaper Generator</h1>
+  <div><h2>Device</h2><div class="g" id="dev"></div></div>
+  <div><h2>Style</h2><div class="g" id="style"></div></div>
+  <div><h2>Colour</h2><div class="g" id="pal"></div>
+    <div class="g" style="margin-top:6px"><input type="color" id="cc" value="#ff6a3d" title="Custom colour"><label><input type="checkbox" id="gr" checked> Film grain</label></div>
+  </div>
+  <div class="row"><button class="big" id="remix">Remix</button><button class="big" id="dl">Download</button></div>
+</aside>
+<main><canvas id="cv"></canvas></main>
+<script>
+const $=id=>document.getElementById(id);
+const SIZES={Desktop:[3840,2160],iPhone:[1320,2868],iPad:[2064,2752]};
+const PAL={
+  Midnight:['#0b1026','#2b2d6e','#6a4fd8','#d16ba5','#ffc6a8'],
+  Sunset:['#2d1b3d','#b33f62','#f26b38','#f9a03f','#ffe3b3'],
+  Ocean:['#03223f','#035aa6','#00a6c8','#7bdff2','#e0fbfc'],
+  Forest:['#0f2018','#1f4d3a','#3f8f5f','#a3c47c','#eef3d2'],
+  Peach:['#5b2a3a','#e07a7a','#f6a89e','#ffd4b8','#fff1e6'],
+  Lavender:['#2a2340','#6c5b9e','#a68ad8','#d7c4f2','#f6effd'],
+  Mono:['#0e0e0e','#3a3a3a','#7a7a7a','#bdbdbd','#f2f2f2'],
+  Neon:['#0a0014','#ff00a0','#7a00ff','#00e5ff','#d4ff00'],
+  Desert:['#3b2418','#9c4a2a','#d98b4e','#eccb93','#f8ecd4'],
+  Mint:['#0d2b2a','#167d6e','#3fc1a5','#a8ecd4','#effcf7'],
+  Candy:['#3d1a4a','#ff6fb5','#ffb86b','#7ee0ff','#fff2a8'],
+  Ember:['#120404','#5c0f0f','#c0261c','#ff7b29','#ffd36b'],
+  Arctic:['#1b2a3a','#3e6d8e','#8fb8d6','#cfe6f5','#ffffff'],
+  Retro:['#1d3557','#e63946','#f4a261','#e9c46a','#f1faee'],
+  Rose:['#2b0f1c','#7d1d42','#c94f7c','#f2a1c0','#fde4ee'],
+  Matcha:['#1e2617','#55683a','#94a85f','#d3dba8','#f5f3e1'],
+};
+// seeded RNG (mulberry32) so Remix = new seed, same style/colours
+const rng=s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const pick=(p,r)=>p[r()*p.length|0];
+const circle=(c,x,y,rad,col)=>{c.fillStyle=col;c.beginPath();c.arc(x,y,rad,0,7);c.fill()};
+const lin=(c,x0,y0,x1,y1,cols)=>{const g=c.createLinearGradient(x0,y0,x1,y1);cols.forEach((k,i)=>g.addColorStop(i/(cols.length-1),k));return g};
+const wave=(c,W,y,a,f,ph)=>{for(let x=0;x<=W;x+=W/120){const t=x/W*6.28*f;c.lineTo(x,y+a*Math.sin(t+ph)+a*.4*Math.sin(t*2.3+ph*1.7))}};
+
+const STYLES={
+  Mesh(c,W,H,p,r,u){c.fillStyle=p[r()*2|0];c.fillRect(0,0,W,H);c.filter=`blur(${u*.15}px)`;for(let i=0;i<8;i++)circle(c,r()*W,r()*H,u*(.25+r()*.45),p[1+(r()*4|0)])},
+  Gradient(c,W,H,p,r){const a=r()*6.28,x=Math.cos(a)*W/2,y=Math.sin(a)*H/2;c.fillStyle=lin(c,W/2-x,H/2-y,W/2+x,H/2+y,r()<.5?p:[...p].reverse());c.fillRect(0,0,W,H);
+    c.globalCompositeOperation='soft-light';const g=c.createRadialGradient(W*(.3+r()*.4),H*(.3+r()*.4),0,W/2,H/2,Math.max(W,H));g.addColorStop(0,'#fff');g.addColorStop(1,'#000');c.fillStyle=g;c.fillRect(0,0,W,H)},
+  Aurora(c,W,H,p,r,u){c.fillStyle=lin(c,0,0,0,H,['#03040a',p[0]]);c.fillRect(0,0,W,H);
+    for(let i=0;i<200;i++){c.globalAlpha=r()*.8;circle(c,r()*W,r()*H*.7,u*.0012*(1+r()),'#fff')}
+    c.globalCompositeOperation='lighter';c.filter=`blur(${u*.04}px)`;
+    for(let i=0;i<6;i++){c.globalAlpha=.35+r()*.3;c.strokeStyle=p[1+i%4];c.lineWidth=u*(.04+r()*.12);c.beginPath();wave(c,W,H*(.15+r()*.45),u*(.05+r()*.15),.5+r()*1.5,r()*6);c.stroke()}},
+  Silk(c,W,H,p,r,u){c.fillStyle=p[0];c.fillRect(0,0,W,H);const n=70,a=u*(.1+r()*.2),f=.5+r()*1.5,ph=r()*6,dp=(r()-.5)*.06,y0=H*(.3+r()*.4),sp=u*(.004+r()*.004);
+    c.lineWidth=u*.002;c.strokeStyle=lin(c,0,0,W,H,p.slice(1));
+    for(let i=0;i<n;i++){c.globalAlpha=.2+.8*Math.sin(i/n*3.14);c.beginPath();wave(c,W,y0+(i-n/2)*sp,a,f,ph+i*dp);c.stroke()}},
+  Bokeh(c,W,H,p,r,u){c.fillStyle=lin(c,0,0,W,H,[p[0],p[1]]);c.fillRect(0,0,W,H);c.globalCompositeOperation='screen';
+    for(let l=0;l<3;l++){c.filter=`blur(${u*.012*(2-l)}px)`;for(let i=0;i<15;i++){c.globalAlpha=.15+r()*.35;circle(c,r()*W,r()*H,u*(.02+r()*.07)*(3-l)/1.5,p[2+(r()*3|0)])}}},
+  Topo(c,W,H,p,r,u){c.fillStyle=p[0];c.fillRect(0,0,W,H);const cx=r()*W,cy=r()*H,a1=r()*6,a2=r()*6,a3=r()*6,g=u*.025;c.globalAlpha=.75;
+    for(let k=1;k*g<Math.hypot(W,H);k++){const hi=k%5==0;c.strokeStyle=p[hi?4:2];c.lineWidth=u*(hi?.004:.002);c.beginPath();
+      for(let a=0;a<6.3;a+=.02){const m=1+.18*Math.sin(a*3+a1+k*.05)+.1*Math.sin(a*5+a2-k*.08)+.06*Math.sin(a*2+a3);c.lineTo(cx+Math.cos(a)*k*g*m,cy+Math.sin(a)*k*g*m)}c.closePath();c.stroke()}},
+  Bauhaus(c,W,H,p,r,u){const s=u/(3+(r()*4|0));
+    for(let y=0;y<H;y+=s)for(let x=0;x<W;x+=s){const b=pick(p,r);let f;do f=pick(p,r);while(f==b);
+      c.fillStyle=b;c.fillRect(x,y,s+1,s+1);c.save();c.beginPath();c.rect(x,y,s,s);c.clip();const t=r()*4|0,q=r()*4|0;
+      if(t==0)circle(c,x+(q&1)*s,y+(q>>1)*s,s,f);else if(t==1)circle(c,x+[s/2,s,s/2,0][q],y+[0,s/2,s,s/2][q],s/2,f);else if(t==2)circle(c,x+s/2,y+s/2,s*.38,f);c.restore()}},
+  Dunes(c,W,H,p,r,u){c.fillStyle=lin(c,0,0,0,H,[p[2],p[4]]);c.fillRect(0,0,W,H);
+    c.save();c.shadowColor='#fff';c.shadowBlur=u*.1;c.globalAlpha=.9;circle(c,W*(.2+r()*.6),H*(.2+r()*.2),u*(.06+r()*.08),'#fff');c.restore();
+    for(let i=0;i<4;i++){c.fillStyle=p[3-i];c.beginPath();c.moveTo(0,H);wave(c,W,H*(.45+i*.13),u*(.03+r()*.05),.5+r()*1.2,r()*6);c.lineTo(W,H);c.fill()}},
+  Retro(c,W,H,p,r,u){c.fillStyle=p[4];c.fillRect(0,0,W,H);const cx=W*(.2+r()*.6),cy=H*(r()<.5?1:.5+r()*.3),b=u*(.06+r()*.05),R0=u*(.15+r()*.2);
+    for(let k=4;k>0;k--)circle(c,cx,cy,R0+k*b,p[k-1]);circle(c,cx,cy,R0,p[4])},
+};
+
+let noise;
+function grain(c,W,H){if(!noise){noise=document.createElement('canvas');noise.width=noise.height=256;const x=noise.getContext('2d'),d=x.createImageData(256,256);
+  for(let i=0;i<d.data.length;i+=4){d.data[i]=d.data[i+1]=d.data[i+2]=Math.random()*255;d.data[i+3]=255}x.putImageData(d,0,0)}
+  c.globalAlpha=.07;c.globalCompositeOperation='overlay';c.fillStyle=c.createPattern(noise,'repeat');c.fillRect(0,0,W,H)}
+
+// custom colour -> 5-tone palette built around its hue
+function fromHex(h){const[r,g,b]=[1,3,5].map(i=>parseInt(h.substr(i,2),16)/255),M=Math.max(r,g,b),d=M-Math.min(r,g,b),
+  hu=60*(!d?0:M==r?(g-b)/d%6:M==g?(b-r)/d+2:(r-g)/d+4);
+  return[[0,55,12],[-20,65,32],[0,75,52],[25,80,70],[40,90,90]].map(([o,s,l])=>`hsl(${hu+o} ${s}% ${l}%)`)}
+
+const S={dev:'Desktop',style:'Mesh',pal:'Midnight',seed:Math.random()*1e9|0};
+function draw(cv,scale){const[w,h]=SIZES[S.dev],W=cv.width=Math.round(w*scale),H=cv.height=Math.round(h*scale),c=cv.getContext('2d');
+  c.save();STYLES[S.style](c,W,H,S.pal=='Custom'?fromHex($('cc').value):PAL[S.pal],rng(S.seed),Math.min(W,H));c.restore();
+  if($('gr').checked){c.save();grain(c,W,H);c.restore()}}
+
+function ui(id,keys,key,html=k=>k,cls=''){const el=$(id);el.innerHTML=keys.map(k=>`<button data-k="${k}" title="${k}" class="${cls} ${S[key]==k?'on':''}">${html(k)}</button>`).join('');
+  el.onclick=e=>{const b=e.target.closest('button');if(b){S[key]=b.dataset.k;render()}}}
+function render(){
+  ui('dev',Object.keys(SIZES),'dev',k=>`${k} <small>${SIZES[k].join('×')}</small>`);
+  ui('style',Object.keys(STYLES),'style');
+  ui('pal',Object.keys(PAL),'pal',k=>PAL[k].map(c=>`<i style="background:${c}"></i>`).join(''),'sw');
+  $('cc').classList.toggle('on',S.pal=='Custom');
+  draw($('cv'),Math.min(1,1200/Math.max(...SIZES[S.dev])));
+}
+$('cc').oninput=()=>{S.pal='Custom';render()};
+$('gr').onchange=render;
+$('remix').onclick=()=>{S.seed=Math.random()*1e9|0;render()};
+$('dl').onclick=()=>{const btn=$('dl');btn.textContent='Rendering…';setTimeout(()=>{const cv=document.createElement('canvas');draw(cv,1);
+  cv.toBlob(b=>{const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`wallpaper-${S.style}-${S.dev}-${S.seed}.png`.toLowerCase();a.click();btn.textContent='Download'})},30)};
+render();
+</script>
+</body>
+</html>
