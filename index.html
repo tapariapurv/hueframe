@@ -1,301 +1,218 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Wallpaper Studio</title>
+<title>Hueframe — wallpapers in your colours</title>
+<meta name="description" content="Generate 4K–8K wallpapers for desktop, iPad and iPhone. 30 generative styles, any colour, matched to your device.">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<script>try{document.documentElement.dataset.theme=localStorage.theme||'light'}catch{}</script>
 <style>
+:root{--bg:#f7f7f8;--surface:#fff;--surface2:#efeff2;--text:#0c0c10;--muted:#6e6e78;--border:#e4e4ea;--ring:#0c0c10;--shadow:0 1px 2px rgb(0 0 0/.05),0 8px 24px rgb(0 0 0/.07);--grad:linear-gradient(120deg,#ff9f45,#ff5e7e 50%,#6c5cff)}
+[data-theme=dark]{--bg:#09090b;--surface:#141417;--surface2:#1c1c21;--text:#f4f4f6;--muted:#8d8d98;--border:#27272e;--ring:#f4f4f6;--shadow:0 1px 2px rgb(0 0 0/.4),0 8px 24px rgb(0 0 0/.45);color-scheme:dark}
 *{box-sizing:border-box;margin:0}
-:root{--bg:#000;--card:#141414;--hover:#1e1e1e;--text:#f0f0f0;--muted:#888;--border:#262626;--accent:#fff}
-body{font:13px -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
-header{height:52px;display:flex;align-items:center;padding:0 24px;border-bottom:1px solid var(--border);font-weight:700;letter-spacing:.5px}
-header span{color:var(--muted);font-weight:400;margin-left:10px}
-.app{display:grid;grid-template-columns:1fr 360px;height:calc(100vh - 52px)}
-.stage{display:flex;align-items:center;justify-content:center;padding:24px;min-width:0}
-.previews{display:flex;gap:20px;align-items:flex-end}
-figure{display:flex;flex-direction:column;gap:8px;align-items:center}
-figcaption,h2{font-size:11px;font-weight:600;letter-spacing:1.5px;color:var(--muted);text-transform:uppercase}
-.previews canvas{height:min(46vh,calc((100vw - 460px)/3.1));border-radius:14px;border:2px solid var(--border);box-shadow:0 10px 40px #0009;display:block}
-#pP{border-radius:22px}
-aside{overflow-y:auto;padding:20px;border-left:1px solid var(--border);display:flex;flex-direction:column;gap:22px}
-section{display:flex;flex-direction:column;gap:10px}
-.styles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.styles.collapsed button:nth-child(n+10){display:none}
-.st{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:4px 4px 6px;cursor:pointer;color:var(--muted);font:inherit;font-size:11px}
-.st canvas{width:100%;aspect-ratio:16/10;border-radius:8px;display:block;margin-bottom:5px}
-.st:hover{border-color:var(--muted)}.st.on{border-color:var(--accent);color:var(--text)}
-button{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 12px;cursor:pointer}
-button:hover{background:var(--hover)}
-.swatches{display:flex;flex-wrap:wrap;gap:7px}
-.sw{width:34px;height:34px;border-radius:50%;padding:0;border:2px solid var(--border)}
-.sw.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--bg) inset}
-.picker{display:grid;grid-template-columns:132px 1fr;gap:12px;background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px}
-.picker.on{border-color:var(--accent)}
+body{font:14px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+a{color:inherit;text-decoration:none}button,select,input{font:inherit;color:inherit}
+[hidden]{display:none!important}
+/* header */
+.top{position:sticky;top:0;z-index:20;height:60px;display:flex;align-items:center;gap:20px;padding:0 20px;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(16px) saturate(1.6);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:750;font-size:18px;letter-spacing:-.03em}.brand img{width:30px;height:30px}
+nav{display:flex;gap:2px;margin-right:auto;background:var(--surface2);padding:3px;border-radius:999px}
+nav a{padding:6px 16px;border-radius:999px;color:var(--muted);font-weight:600;font-size:13px;transition:.2s}nav a.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.icon{width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:grid;place-items:center;cursor:pointer;transition:.2s;flex:none}
+.icon:hover{box-shadow:var(--shadow)}.icon svg{width:18px;height:18px}
+[data-theme=dark] .moon,[data-theme=light] .sun{display:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:44px;padding:0 20px;border-radius:12px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-weight:600;transition:transform .15s,box-shadow .15s;white-space:nowrap}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.btn:active{transform:none}
+.btn.primary{background:var(--text);color:var(--bg);border-color:transparent}
+.btn small{opacity:.6;font-weight:500}
+/* device frames */
+.screen{background:#0b0b0d;padding:7px;border-radius:14px 14px 4px 4px;box-shadow:0 20px 50px rgb(0 0 0/.22)}
+.base{height:12px;margin:0 -7%;background:linear-gradient(#e2e3e6,#a6a8ad);border-radius:0 0 12px 12px}
+.tablet{background:#0b0b0d;padding:7px;border-radius:20px;box-shadow:0 20px 50px rgb(0 0 0/.22)}
+.phone{background:#0b0b0d;padding:5px;border-radius:26px;position:relative;box-shadow:0 20px 50px rgb(0 0 0/.25)}
+.phone::after{content:"";position:absolute;top:13px;left:50%;width:28%;height:10px;background:#000;border-radius:99px;transform:translateX(-50%)}
+.screen canvas{border-radius:8px}.tablet canvas{border-radius:14px}.phone canvas{border-radius:21px}
+canvas{display:block}
+/* home */
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+.hero{display:grid;grid-template-columns:1fr 1.15fr;gap:56px;align-items:center;padding-top:64px;padding-bottom:64px}
+.pill{display:inline-flex;gap:8px;align-items:center;padding:6px 12px;border-radius:999px;background:var(--surface);border:1px solid var(--border);font-size:12px;font-weight:600;color:var(--muted);margin-bottom:22px}
+.pill i{width:8px;height:8px;border-radius:50%;background:var(--grad)}
+h1{font-size:clamp(40px,5.6vw,72px);line-height:1;letter-spacing:-.045em;font-weight:780}
+h1 em,.grad{font-style:normal;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{font-size:18px;color:var(--muted);margin:22px 0 30px;max-width:30em}
+.ctas{display:flex;gap:10px;flex-wrap:wrap}
+.art{position:relative;padding:0 6% 28px 0}
+.art .screen canvas{width:100%;aspect-ratio:16/10}
+.art .phone{position:absolute;right:0;bottom:0;width:23%}.art .phone canvas{width:100%;aspect-ratio:9/19.5}
+.now{margin-top:22px;font-size:13px;color:var(--muted)}.now a{color:var(--text);font-weight:600;border-bottom:1px solid var(--border)}
+.sec{padding:56px 0 8px}.sec-h{display:flex;justify-content:space-between;align-items:end;gap:16px;margin-bottom:22px}
+.sec h2{font-size:30px;letter-spacing:-.03em}.sec p{color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:18px}
+.card canvas{width:100%;aspect-ratio:16/10;border-radius:14px;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+.card span{display:flex;justify-content:space-between;padding:10px 2px;font-weight:600}.card em{font-style:normal;color:var(--muted);opacity:0;transition:.2s}
+.card:hover canvas,.wp:hover canvas{transform:translateY(-4px);box-shadow:0 18px 40px rgb(0 0 0/.18)}.card:hover em{opacity:1}
+.walls{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px}
+.wp canvas{width:100%;aspect-ratio:9/19.5;border-radius:20px;box-shadow:var(--shadow);transition:transform .25s,box-shadow .25s}
+.wp b{display:block;margin-top:10px}.wp small{color:var(--muted)}
+footer{margin-top:80px;padding:28px 24px;border-top:1px solid var(--border);color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer a{color:var(--text);font-weight:600}
+/* editor */
+.editor{display:grid;grid-template-columns:1fr 380px;height:calc(100vh - 60px)}
+.stage{display:flex;flex-direction:column;min-width:0;background:var(--surface2) radial-gradient(color-mix(in srgb,var(--muted) 30%,transparent) 1px,transparent 1.5px) 0 0/22px 22px}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 24px;flex-wrap:wrap}
+.bar h2{font-size:22px;letter-spacing:-.03em}.bar p{color:var(--muted);font-size:13px}
+.bar .row{display:flex;gap:8px;align-items:center}
+.devices{flex:1;display:flex;align-items:center;justify-content:center;gap:28px;padding:12px 24px 48px;--ph:min(56vh,calc((100vw - 520px)/3.4))}
+.dev{display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;background:none;border:0;padding:0}
+.dev canvas{height:var(--ph);width:auto}
+.dev>div{transition:transform .3s}.dev:hover>div{transform:translateY(-4px)}
+.cap{font-size:12px;font-weight:600;color:var(--muted);padding:5px 12px;border-radius:999px;transition:.2s}
+.dev.sel .cap{background:var(--text);color:var(--bg)}
+.panel{border-left:1px solid var(--border);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.scroll{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:28px}
+h3{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+h3 span{text-transform:none;letter-spacing:0;font-weight:500}
+kbd{font:11px ui-monospace,Menlo,monospace;padding:1px 5px;border:1px solid var(--border);border-bottom-width:2px;border-radius:5px}
+.styles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.styles.collapsed .st:nth-child(n+10){display:none}
+.st{background:none;border:0;padding:0;cursor:pointer;font-size:11px;font-weight:600;color:var(--muted);text-align:left}
+.st canvas{width:100%;aspect-ratio:16/10;border-radius:10px;margin-bottom:6px;outline:2px solid transparent;outline-offset:2px;transition:outline-color .15s,transform .2s}
+.st:hover canvas{transform:scale(1.03)}.st.on{color:var(--text)}.st.on canvas{outline-color:var(--ring)}
+.more{width:100%;margin-top:12px;height:38px;font-size:13px}
+.seg{display:flex;background:var(--surface2);border-radius:12px;padding:3px;gap:3px}
+.seg button{flex:1;border:0;background:none;padding:8px 6px;border-radius:9px;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px;transition:.15s}
+.seg button.on{background:var(--surface);color:var(--text);box-shadow:var(--shadow)}
+.pane{margin-top:14px}
+.swatches{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+.sw{aspect-ratio:1;border-radius:50%;border:0;cursor:pointer;outline:2px solid transparent;outline-offset:2px;transition:transform .15s}
+.sw:hover{transform:scale(1.12)}.sw.on{outline-color:var(--ring)}
+.picker{display:grid;grid-template-columns:132px 1fr;gap:14px}
 .wheel{position:relative;width:132px;height:132px;touch-action:none;cursor:crosshair}
-.wheel canvas{width:132px;height:132px;border-radius:50%}
-#mark{position:absolute;width:14px;height:14px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #000a;transform:translate(-50%,-50%);pointer-events:none}
+.wheel canvas{width:132px;height:132px;border-radius:50%;box-shadow:inset 0 0 0 1px var(--border)}
+#mark{position:absolute;width:18px;height:18px;border:3px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgb(0 0 0/.4);transform:translate(-50%,-50%);pointer-events:none}
 .col{display:flex;flex-direction:column;gap:8px;min-width:0}
 .row{display:flex;gap:6px;align-items:center}
-input[type=text],input[type=number]{width:100%;min-width:0;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:7px 8px;font:12px ui-monospace,Menlo,monospace}
-input[type=number]{-moz-appearance:textfield;padding:7px 4px;text-align:center}
-input::-webkit-inner-spin-button{display:none}
-#native{width:34px;height:32px;border:1px solid var(--border);border-radius:8px;background:none;padding:2px;cursor:pointer;flex:none}
-.sliders{grid-column:1/-1;display:flex;flex-direction:column;gap:8px}
-.sliders label{display:grid;grid-template-columns:14px 1fr 34px;gap:8px;align-items:center;color:var(--muted);font-size:11px}
-input[type=range]{-webkit-appearance:none;appearance:none;height:12px;border-radius:6px;width:100%}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #000;cursor:pointer}
-input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:#fff;border:2px solid #000}
-.seg{display:flex;gap:6px}.seg button{flex:1}.seg button.on{background:var(--text);color:var(--bg)}
-.toggles{display:flex;gap:16px;color:var(--muted)}
-.cta{background:var(--text);color:var(--bg);font-weight:700;letter-spacing:1px;padding:13px}
-.cta:hover{background:#ddd}
-.dl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-.dl button{display:flex;flex-direction:column;gap:2px;padding:10px 4px}
-.dl small{color:var(--muted);font-size:10px}
-@media(max-width:860px){
-  .app{grid-template-columns:1fr;height:auto}
-  aside{border-left:0;overflow:visible}
-  .previews{flex-wrap:wrap;justify-content:center}
-  #pD{width:calc(100vw - 48px);height:auto}
-  #pT,#pP{height:44vw}
+.field{position:relative;flex:1;min-width:0}.field b{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--muted)}
+.field input{width:100%;background:var(--surface2);border:1px solid transparent;border-radius:9px;padding:8px 6px 8px 20px;font:12px ui-monospace,Menlo,monospace;outline:0}
+.field input:focus{border-color:var(--ring)}
+input[type=number]{-moz-appearance:textfield}input::-webkit-inner-spin-button{display:none}
+#native{width:38px;height:36px;border:1px solid var(--border);border-radius:9px;background:none;padding:3px;cursor:pointer;flex:none}
+.small{height:36px;padding:0 10px;font-size:13px;flex:1}
+.sliders{grid-column:1/-1;display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.sliders label{display:grid;grid-template-columns:14px 1fr 30px;gap:10px;align-items:center;color:var(--muted);font-size:11px;font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;height:10px;border-radius:6px;width:100%;box-shadow:inset 0 0 0 1px rgb(0 0 0/.08)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgb(0 0 0/.4);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border:0;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgb(0 0 0/.4)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.chip{border:1px solid var(--border);background:var(--surface);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.chip.on{background:var(--text);color:var(--bg);border-color:transparent}
+.finishes{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.finish{display:flex;align-items:center;gap:10px;padding:8px;border:1px solid var(--border);border-radius:12px;background:var(--surface);cursor:pointer;font-size:12px;font-weight:600;text-align:left}
+.finish i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1px rgb(0 0 0/.12);flex:none}
+.finish.on{border-color:var(--ring);box-shadow:0 0 0 1px var(--ring)}
+.note{font-size:11px;color:var(--muted);margin-top:10px}
+.switch{display:flex;align-items:center;justify-content:space-between;font-weight:600;margin-top:12px;cursor:pointer}
+.switch input{appearance:none;width:40px;height:24px;border-radius:99px;background:var(--border);position:relative;cursor:pointer;transition:.2s}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgb(0 0 0/.3);transition:.2s}
+.switch input:checked{background:var(--text)}.switch input:checked::after{left:19px}
+.dock{border-top:1px solid var(--border);padding:16px 20px;display:flex;flex-direction:column;gap:10px;background:var(--surface)}
+.dock .row{gap:8px}
+select{height:44px;border-radius:12px;border:1px solid var(--border);background:var(--surface);padding:0 10px;font-weight:600;cursor:pointer}
+.grow{flex:1}
+.spin svg{animation:spin .5s ease}@keyframes spin{to{transform:rotate(360deg)}}
+#toast{position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);opacity:0;background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:600;transition:.25s;pointer-events:none;z-index:50}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;padding-top:40px;gap:40px}
+  .editor{grid-template-columns:1fr;height:auto}
+  .devices{flex-wrap:wrap;--ph:44vw;gap:18px}.dev:first-child{width:100%}.dev:first-child canvas{width:100%;height:auto}
+  .panel{border-left:0}.scroll{overflow:visible}.dock{position:sticky;bottom:0;box-shadow:0 -8px 24px rgb(0 0 0/.08)}
 }
 </style>
 </head>
 <body>
-<header>WALLPAPER STUDIO<span>4K–8K wallpapers for every screen</span></header>
-<div class="app">
-  <div class="stage"><div class="previews">
-    <figure><figcaption>Desktop</figcaption><canvas id="pD"></canvas></figure>
-    <figure><figcaption>iPad</figcaption><canvas id="pT"></canvas></figure>
-    <figure><figcaption>iPhone</figcaption><canvas id="pP"></canvas></figure>
-  </div></div>
-  <aside>
-    <section><h2>Style</h2><div class="styles collapsed" id="styles"></div><button id="more"></button></section>
-    <section><h2>Colour</h2>
-      <div class="swatches" id="swatches"></div>
-      <div class="picker" id="picker">
-        <div class="wheel" id="wheel"><canvas id="wc" width="264" height="264"></canvas><div id="mark"></div></div>
-        <div class="col">
-          <div class="row"><input type="color" id="native" title="System colour picker"><button id="drop" title="Pick a colour from anywhere on screen" style="flex:1;padding:7px">Eyedropper</button></div>
-          <input type="text" id="hex" maxlength="7" spellcheck="false" aria-label="Hex">
-          <div class="row"><input type="number" id="cr" min="0" max="255" aria-label="Red"><input type="number" id="cg" min="0" max="255" aria-label="Green"><input type="number" id="cb" min="0" max="255" aria-label="Blue"></div>
-          <div class="row" style="color:var(--muted);font-size:10px;justify-content:space-around"><span>R</span><span>G</span><span>B</span></div>
+<header class="top">
+  <a class="brand" href="#/"><img src="logo.svg" alt="">Hueframe</a>
+  <nav><a href="#/" data-v="home">Discover</a><a href="#/create" data-v="create">Create</a></nav>
+  <button class="icon" id="theme" aria-label="Toggle dark mode">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+
+<main id="home" class="view">
+  <section class="wrap hero">
+    <div>
+      <span class="pill"><i></i>Free · 4K to 8K · No sign-up</span>
+      <h1>Wallpapers in<br><em>your colours.</em></h1>
+      <p class="lead">Pick a style, match the colour of your MacBook, iPhone or anything on your screen, and export pixel-perfect wallpapers for desktop, iPad and iPhone.</p>
+      <div class="ctas"><a class="btn primary" href="#/create">Start creating →</a><button class="btn" id="explore">Explore styles</button></div>
+      <p class="now" id="now"></p>
+    </div>
+    <div class="art">
+      <div><div class="screen"><canvas id="heroD" width="1440" height="900"></canvas></div><div class="base"></div></div>
+      <div class="phone"><canvas id="heroP" width="390" height="845"></canvas></div>
+    </div>
+  </section>
+  <section class="wrap sec" id="styleSec"><div class="sec-h"><div><h2>Styles</h2><p>30 generative styles. Each one has infinite variations.</p></div></div><div class="cards" id="homeStyles"></div></section>
+  <section class="wrap sec"><div class="sec-h"><div><h2>Community picks</h2><p>Open any of these and make it yours in one click.</p></div></div><div class="walls" id="community"></div></section>
+  <footer><span><b>Hueframe</b> · made for every screen</span><a href="https://github.com/tapariapurv/hueframe">GitHub ↗</a></footer>
+</main>
+
+<main id="create" class="view editor" hidden>
+  <div class="stage">
+    <div class="bar">
+      <div><h2 id="sname"></h2><p id="pname"></p></div>
+      <div class="row"><button class="btn" id="share">Copy link</button></div>
+    </div>
+    <div class="devices">
+      <button class="dev" data-d="Desktop"><div><div class="screen"><canvas id="pD"></canvas></div><div class="base"></div></div><span class="cap">Desktop</span></button>
+      <button class="dev" data-d="iPad"><div class="tablet"><canvas id="pT"></canvas></div><span class="cap">iPad</span></button>
+      <button class="dev" data-d="iPhone"><div class="phone"><canvas id="pP"></canvas></div><span class="cap">iPhone</span></button>
+    </div>
+  </div>
+  <aside class="panel">
+    <div class="scroll">
+      <section><h3>Style <span><kbd>←</kbd> <kbd>→</kbd></span></h3><div class="styles collapsed" id="styles"></div><button class="btn more" id="more"></button></section>
+      <section><h3>Colour</h3>
+        <div class="seg" id="ctabs"><button data-t="pal" class="on">Palettes</button><button data-t="custom">Custom</button><button data-t="device">My device</button></div>
+        <div class="pane" data-p="pal"><div class="swatches" id="swatches"></div></div>
+        <div class="pane picker" data-p="custom" hidden>
+          <div class="wheel" id="wheel"><canvas id="wc" width="264" height="264"></canvas><div id="mark"></div></div>
+          <div class="col">
+            <div class="row"><input type="color" id="native" title="System colour picker"><button class="btn small" id="drop" title="Pick a colour from anywhere on your screen">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m2 22 1-1h3l9-9M3 21v-3l9-9M15 6l3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3z"/></svg>Pick</button></div>
+            <div class="field"><input type="text" id="hex" style="padding-left:10px" maxlength="7" spellcheck="false" aria-label="Hex"></div>
+            <div class="row"><div class="field"><b>R</b><input type="number" id="cr" min="0" max="255"></div><div class="field"><b>G</b><input type="number" id="cg" min="0" max="255"></div><div class="field"><b>B</b><input type="number" id="cb" min="0" max="255"></div></div>
+          </div>
+          <div class="sliders">
+            <label>H<input type="range" id="sh" min="0" max="360"><span id="vh"></span></label>
+            <label>S<input type="range" id="ss" min="0" max="100"><span id="vs"></span></label>
+            <label>L<input type="range" id="sl" min="0" max="100"><span id="vl"></span></label>
+          </div>
         </div>
-        <div class="sliders">
-          <label>H<input type="range" id="sh" min="0" max="360"><span id="vh"></span></label>
-          <label>S<input type="range" id="ss" min="0" max="100"><span id="vs"></span></label>
-          <label>L<input type="range" id="sl" min="0" max="100"><span id="vl"></span></label>
-        </div>
+        <div class="pane" data-p="device" hidden><div class="chips" id="models"></div><div class="finishes" id="finishes"></div><p class="note">Finish colours are close approximations of each device.</p></div>
+      </section>
+      <section><h3>Finish</h3>
+        <div class="seg" id="tone"><button data-v="0">Dark tone</button><button data-v="1">Light tone</button></div>
+        <label class="switch">Film grain<input type="checkbox" id="grain" checked></label>
+        <label class="switch">Show lock screen clock<input type="checkbox" id="clock" checked></label>
+      </section>
+    </div>
+    <div class="dock">
+      <div class="seg" id="devseg"><button data-d="Desktop">Desktop</button><button data-d="iPad">iPad</button><button data-d="iPhone">iPhone</button></div>
+      <div class="row">
+        <button class="icon" id="remix" title="New variation (Space)" style="width:44px;height:44px;border-radius:12px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></button>
+        <select id="qual" aria-label="Quality"><option>4K</option><option>6K</option><option>8K</option></select>
+        <button class="btn primary grow" id="dl">Download</button>
       </div>
-    </section>
-    <section><h2>Mode</h2><div class="seg"><button id="dark" class="on">Dark</button><button id="light">Light</button></div>
-      <div class="toggles"><label><input type="checkbox" id="grain" checked> Film grain</label><label><input type="checkbox" id="clock" checked> Clock preview</label></div>
-    </section>
-    <button class="cta" id="remix">↻ GENERATE VARIATION</button>
-    <section><h2>Quality</h2><div class="seg" id="quality"></div></section>
-    <section><h2>Download</h2><div class="dl" id="dl"></div></section>
+    </div>
   </aside>
-</div>
-<script>
-const $=id=>document.getElementById(id);
-const DEV={Desktop:[3840,2160,'pD'],iPad:[2064,2752,'pT'],iPhone:[1320,2868,'pP']};
-const QUAL={'4K':1,'6K':1.5,'8K':2};
-// 4 anchors per palette, dark -> light; expanded to an 11-step ramp
-const PAL={Charcoal:['#050505','#2a2a2a','#8c8c8c','#f5f5f5'],Stone:['#1a1714','#534e47','#9f9688','#ece6dc'],Blue:['#01052b','#0825c7','#58a3ff','#edf8ff'],
-Sunrise:['#031c35','#0b4b7a','#ff7240','#fff0c8'],Fire:['#1a0000','#b30000','#ff9500','#fff1c2'],Purple:['#100014','#5c0085','#b84dff','#f7ebff'],
-Toxic:['#050807','#1e3325','#86b326','#f6ffe0'],Arctic:['#081018','#33516a','#a7c2d3','#ffffff'],Neon:['#13051a','#3b2285','#2ca1e8','#e0fbfd'],
-Forest:['#051214','#18524c','#68ba89','#c3ebd0'],Nebula:['#120414','#5c1a5c','#c85b98','#fff1f6'],Ocean:['#020c1b','#0d3b6e','#30a5b8','#d4fff2'],
-'Blood Moon':['#000000','#330000','#880000','#ff3a2a'],Peach:['#3b1f2b','#c2566b','#f4a28c','#fff1e6'],Lavender:['#1a1530','#5a4a9e','#b9a3e8','#f6effd'],
-Matcha:['#141a10','#4a5e32','#a3b86c','#f5f3e1'],Desert:['#2a160d','#8c4426','#e0a066','#faf0dc'],Candy:['#2b0f3a','#ff4fa3','#ffc46b','#fffbe6'],
-Mint:['#06201d','#167d6e','#6fdcc0','#effcf7'],Gold:['#120d02','#5c4206','#d4a017','#fff6d6'],Synth:['#0d0221','#541388','#ff2a6d','#ffd319'],
-Rose:['#1f0a14','#7d1d42','#e27aa3','#fde4ee'],Sky:['#0a1a33','#2e6bb8','#8cc8f2','#f2fbff'],Autumn:['#1a0d05','#7a2e12','#d9822b','#f7e3b5']};
-
-const S={style:0,pal:'Sunrise',seed:Math.random()*1e9|0,inv:false,q:'4K',hsl:[18,100,63]};
-
-// ---------- colour maths ----------
-const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
-const rgb2hex=a=>'#'+a.map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
-const hsl2rgb=(h,s,l)=>{h=(h%360+360)%360;s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l);return[0,8,4].map(n=>255*(l-a*Math.max(-1,Math.min(k(n)-3,9-k(n),1))))};
-const rgb2hsl=(r,g,b)=>{r/=255;g/=255;b/=255;const M=Math.max(r,g,b),m=Math.min(r,g,b),d=M-m,l=(M+m)/2,s=d?d/(1-Math.abs(2*l-1)):0,h=!d?0:M==r?((g-b)/d+6)%6:M==g?(b-r)/d+2:(r-g)/d+4;return[h*60,s*100,l*100]};
-const lerp=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
-function ramp(name){
-  if(name=='Custom'){const[h,s,l]=S.hsl,L=Math.min(.9,Math.max(.1,l/100));
-    // ramp passes exactly through the picked colour at t=L
-    return Array.from({length:11},(_,i)=>{const t=i/10,lt=t<L?4+(l-4)*t/L:l+(97-l)*(t-L)/(1-L);return hsl2rgb(S.hsl[0]+(t-L)*25,s*(1-.35*Math.abs(t-L)),Math.min(98,Math.max(2,lt)))})}
-  const A=PAL[name].map(hex2rgb);return Array.from({length:11},(_,i)=>{const x=i/10*3,j=Math.min(2,x|0);return lerp(A[j],A[j+1],x-j)})}
-let RAMP;
-function col(t,a){t=Math.min(1,Math.max(0,S.inv?1-t:t))*10;const i=Math.min(9,t|0),[r,g,b]=lerp(RAMP[i],RAMP[i+1],t-i).map(Math.round);return a==null?`rgb(${r} ${g} ${b})`:`rgb(${r} ${g} ${b}/${a})`}
-
-// ---------- drawing helpers ----------
-const rng=s=>()=>{s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
-const lg=(c,x0,y0,x1,y1,s)=>{const g=c.createLinearGradient(x0,y0,x1,y1);s.forEach((k,i)=>g.addColorStop(i/(s.length-1),k));return g};
-const dot=(c,x,y,r,f)=>{c.fillStyle=f;c.beginPath();c.arc(x,y,Math.max(r,0),0,7);c.fill()};
-const fill=(K,f)=>{K.c.fillStyle=f;K.c.fillRect(0,0,K.W,K.H)};
-const sky=(K,a,b)=>fill(K,lg(K.c,0,0,0,K.H,[col(a),col(b)]));
-const glow=(K,x,y,R,t)=>{const g=K.c.createRadialGradient(x,y,0,x,y,R);g.addColorStop(0,col(t,.85));g.addColorStop(1,col(t,0));fill(K,g)};
-const stars=(K,n,maxY)=>{for(let i=0;i<n;i++)dot(K.c,K.r()*K.W,K.r()*K.H*maxY,K.u*.0013*(.4+K.r()),col(1,K.r()*.9))};
-const ridge=(K,f,style)=>{const{c,W,H}=K;c.fillStyle=style;c.beginPath();c.moveTo(0,H);for(let x=0;x<=W+W/500;x+=W/500)c.lineTo(x,f(x/W));c.lineTo(W,H);c.fill()};
-const wave=(c,W,y,a,f,ph)=>{for(let x=0;x<=W;x+=W/150){const t=x/W*6.28*f;c.lineTo(x,y+a*Math.sin(t+ph)+a*.4*Math.sin(t*2.3+ph*1.7))}};
-const shadow=(c,u,a=.35,dy=0)=>{c.shadowColor=`rgb(0 0 0/${a})`;c.shadowBlur=u*.035;c.shadowOffsetY=dy*u};
-
-// ---------- styles (first 9 shown, rest behind "see more") ----------
-const STY=[
-['Hills',K=>{const{c,W,H,u,r,n1}=K;sky(K,.12,.5);const x=W*(.2+r()*.6),y=H*(.25+r()*.12);glow(K,x,y,u*.5,.85);dot(c,x,y,u*.055,col(.97));
-  for(let i=0;i<6;i++){const o=r()*99;ridge(K,t=>H*(.45+i*.085)+n1(t*(1.6+i*.5)+o)*u*(.32-i*.03),col(.44-i*.075))}}],
-['Mountains',K=>{const{c,W,H,u,r,n1}=K;sky(K,.05,.5);const x=W*(.15+r()*.7),y=H*(.15+r()*.12);glow(K,x,y,u*.35,.75);dot(c,x,y,u*.045,col(.97));
-  for(let i=0;i<5;i++){const o=r()*99;ridge(K,t=>H*(.52+i*.1)-Math.abs(n1(t*(2+i*.8)+o,8))*u*(.9-i*.13),col(.46-i*.09))}}],
-['Forest',K=>{const{c,W,H,u,r,n1}=K;sky(K,.1,.5);const sx=W*(.2+r()*.6),sy=H*(.2+r()*.1);glow(K,sx,sy,u*.45,.85);dot(c,sx,sy,u*.05,col(.97));
-  for(let i=0;i<5;i++){const cl=col(.46-i*.09),o=r()*99,f=t=>H*(.5+i*.1)+n1(t*(1.5+i*.4)+o)*u*.22,s=u*(.022+i*.01);ridge(K,f,cl);c.fillStyle=cl;c.beginPath();
-    for(let x=-s;x<W+s;x+=s*(.4+r()*.6)){const y=f(x/W)+s*.4,h=s*(2.2+r()*1.6);for(let k=0;k<3;k++){const ty=y-h*k*.27,w=s*(.6-k*.15);c.moveTo(x,ty-h*.46);c.lineTo(x+w,ty);c.lineTo(x-w,ty)}}c.fill()}}],
-['Waves',K=>{const{c,H,u,r}=K;const f=.5+r()*1.2,ph=r()*6,a=u*(.03+r()*.05);shadow(c,u,.4,-.006);
-  for(let i=0;i<9;i++){const y0=H*(.1+i*.1);ridge(K,x=>y0+a*Math.sin(x*6.28*f+ph+i*.7)+a*.5*Math.sin(x*14+ph*2+i),col(.12+i*.1))}}],
-['Dunes',K=>{const{c,W,H,u,r}=K;sky(K,.3,.75);const x=W*(.2+r()*.6),y=H*(.25+r()*.1);glow(K,x,y,u*.45,.98);dot(c,x,y,u*.065,col(1));
-  for(let i=0;i<5;i++){const y0=H*(.5+i*.11),a=u*(.04+r()*.05),f=.4+r()*.8,ph=r()*6,t=.62-i*.13;ridge(K,x=>y0+a*Math.sin(x*6.28*f+ph)+a*.3*Math.sin(x*17+ph),lg(c,0,y0-a,W*.6,y0+a*4,[col(t+.14),col(t),col(t-.1)]))}}],
-['Arcs',K=>{const{c,W,H,u,r}=K;const cx=W*(.15+r()*.7),cy=H*(r()<.5?1.02:.75+r()*.2),n=8+(r()*6|0),st=Math.hypot(W,H)*1.05/n;shadow(c,u,.35);
-  for(let k=n;k>0;k--)dot(c,cx,cy,k*st,col(.08+.9*(1-k/n)))}],
-['Mesh',K=>{const{c,W,H,u,r}=K;fill(K,col(.15));c.filter=`blur(${u*.14}px)`;for(let i=0;i<9;i++)dot(c,r()*W,r()*H,u*(.2+r()*.4),col(.15+r()*.85))}],
-['Aurora',K=>{const{c,W,H,u,r,n1}=K;sky(K,0,.22);stars(K,260,.8);c.globalCompositeOperation='lighter';c.filter=`blur(${u*.035}px)`;
-  for(let i=0;i<7;i++){const o=r()*99,y0=H*(.2+r()*.35),a=u*(.25+r()*.3);c.strokeStyle=col(.55+r()*.45,.35);c.lineWidth=u*(.03+r()*.1);c.beginPath();for(let x=-.1;x<=1.1;x+=.005)c.lineTo(x*W,y0+n1(x*2+o,3)*a);c.stroke()}
-  c.globalCompositeOperation='source-over';c.filter='none';ridge(K,x=>H*.86+n1(x*3+r()*9)*u*.14,col(.02))}],
-['Silk',K=>{const{c,W,H,u,r}=K;fill(K,col(.04));const n=80,a=u*(.1+r()*.2),f=.5+r(),ph=r()*6,dp=(r()-.5)*.05,y0=H*(.35+r()*.3),sp=u*(.003+r()*.004);
-  c.lineWidth=u*.0018;c.strokeStyle=lg(c,0,0,W,H,[col(.35),col(.7),col(1)]);for(let i=0;i<n;i++){c.globalAlpha=.15+.85*Math.sin(i/n*3.14);c.beginPath();wave(c,W,y0+(i-n/2)*sp,a*(1+i/n*.5),f,ph+i*dp);c.stroke()}}],
-['Topo',K=>{const{c,W,H,u,r}=K;fill(K,col(.05));const cx=r()*W,cy=r()*H,a1=r()*6,a2=r()*6,a3=r()*6,g=u*.025;c.globalAlpha=.8;
-  for(let k=1;k*g*.7<Math.hypot(W,H);k++){const hi=k%5==0;c.strokeStyle=col(hi?.75:.35);c.lineWidth=u*(hi?.0035:.0018);c.beginPath();
-    for(let a=0;a<6.3;a+=.015){const m=1+.18*Math.sin(a*3+a1+k*.05)+.1*Math.sin(a*5+a2-k*.08)+.06*Math.sin(a*2+a3);c.lineTo(cx+Math.cos(a)*k*g*m,cy+Math.sin(a)*k*g*m)}c.closePath();c.stroke()}}],
-['Bokeh',K=>{const{c,W,H,u,r}=K;fill(K,lg(c,0,0,W,H,[col(.02),col(.28)]));c.globalCompositeOperation='screen';
-  for(let l=0;l<3;l++){c.filter=`blur(${u*.012*(2-l)}px)`;for(let i=0;i<16;i++){c.globalAlpha=.15+r()*.35;dot(c,r()*W,r()*H,u*(.02+r()*.07)*(3-l)/1.5,col(.5+r()*.5))}}}],
-['Bauhaus',K=>{const{c,W,H,u,r}=K;const s=u/(3+(r()*4|0)),q=()=>col((r()*5|0)/4*.9+.05);
-  for(let y=0;y<H;y+=s)for(let x=0;x<W;x+=s){const b=q();let f;do f=q();while(f==b);c.fillStyle=b;c.fillRect(x,y,s+1,s+1);c.save();c.beginPath();c.rect(x,y,s,s);c.clip();const t=r()*4|0,k=r()*4|0;
-    if(t==0)dot(c,x+(k&1)*s,y+(k>>1)*s,s,f);else if(t==1)dot(c,x+[s/2,s,s/2,0][k],y+[0,s/2,s,s/2][k],s/2,f);else if(t==2)dot(c,x+s/2,y+s/2,s*.38,f);c.restore()}}],
-['Synthwave',K=>{const{c,W,H,u,r}=K;const hz=H*.62,sk=lg(c,0,0,0,hz,[col(0),col(.45)]),sx=W*(.3+r()*.4),R=u*.28,sy=hz-R*.3;c.fillStyle=sk;c.fillRect(0,0,W,hz);stars(K,120,.45);glow(K,sx,sy,R*2.2,.75);
-  dot(c,sx,sy,R,lg(c,0,sy-R,0,sy+R,[col(1),col(.62)]));c.fillStyle=sk;for(let k=0;k<7;k++)c.fillRect(sx-R,sy+R*(.05+k*.14),2*R,R*(.015+k*.018));
-  c.fillStyle=lg(c,0,hz,0,H,[col(.06),col(.22)]);c.fillRect(0,hz,W,H-hz);c.strokeStyle=col(.85,.85);c.lineWidth=u*.0022;c.shadowColor=col(.9);c.shadowBlur=u*.012;c.beginPath();
-  for(let k=1;k<30;k++){const y=hz+(H-hz)*Math.pow(k/14,2.2);if(y>H)break;c.moveTo(0,y);c.lineTo(W,y)}c.moveTo(0,hz);c.lineTo(W,hz);
-  for(let k=-40;k<=40;k++){c.moveTo(sx+k*u*.03,hz);c.lineTo(sx+k*u*.4,H)}c.stroke()}],
-['Night',K=>{const{c,W,H,u,r,n1}=K;sky(K,0,.38);stars(K,450,.8);const x=W*(.15+r()*.7),y=H*(.15+r()*.2);glow(K,x,y,u*.32,.9);dot(c,x,y,u*.045,col(1));
-  const o=r()*9;ridge(K,t=>H*.72+n1(t*2+o)*u*.25,col(.14));ridge(K,t=>H*.84+n1(t*3+o+5)*u*.18,col(.04))}],
-['Ripples',K=>{const{c,W,H,u,r}=K;fill(K,col(.03));c.globalCompositeOperation='lighter';c.lineWidth=u*.004;const g=u*.022,D=Math.hypot(W,H);
-  for(let j=0;j<2;j++){const cx=r()*W,cy=r()*H;c.strokeStyle=col(.55+j*.35,.55);for(let k=1;k*g<D;k++){c.beginPath();c.arc(cx,cy,k*g,0,7);c.stroke()}}}],
-['Nested',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.04));const cx=W*(.3+r()*.4),cy=H*(.3+r()*.4),o=r()*99,D=Math.hypot(W,H);shadow(c,u,.45);
-  for(let k=12;k>0;k--){const R=D*.62*k/12;c.fillStyle=col(.08+.9*(1-k/12));c.beginPath();for(let a=0;a<6.29;a+=.02){const m=R*(1+.45*n2(Math.cos(a)*1.3+o+k*.06,Math.sin(a)*1.3+o));c.lineTo(cx+Math.cos(a)*m,cy+Math.sin(a)*m)}c.fill()}}],
-['Spheres',K=>{const{c,W,H,u,r}=K;fill(K,lg(c,0,0,0,H,[col(.04),col(.22)]));shadow(c,u,.5,.015);const B=[];for(let i=0;i<14;i++)B.push([r()*W,r()*H,u*(.03+r()*r()*.25),r()]);B.sort((a,b)=>a[2]-b[2]);
-  for(const[x,y,R,t]of B){const g=c.createRadialGradient(x-R*.35,y-R*.4,R*.05,x,y,R);g.addColorStop(0,col(1));g.addColorStop(.5,col(.35+t*.5));g.addColorStop(1,col(.1+t*.3));dot(c,x,y,R,g)}}],
-['Papercut',K=>{const{c,H,u,r,n1}=K;fill(K,col(.95));shadow(c,u,.4,-.008);for(let i=0;i<10;i++){const o=r()*99,y0=H*(.06+i*.1);ridge(K,x=>y0+n1(x*(1.2+r()*.01)+o,4)*u*.3,col(.9-i*.09))}}],
-['Halftone',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.04));const s=u*.024,o=r()*9;for(let y=s/2;y<H;y+=s)for(let x=s/2;x<W;x+=s){const v=Math.min(1,Math.max(0,n2(x/u*2+o,y/u*2)*1.4+.5));dot(c,x,y,s*.48*v,col(.25+.75*v))}}],
-['Flow',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.03));c.lineWidth=u*.0016;c.lineCap='round';const o=r()*9;
-  for(let i=0;i<900;i++){let x=r()*W,y=r()*H;c.strokeStyle=col(.3+r()*.7,.65);c.beginPath();c.moveTo(x,y);for(let s=0;s<60;s++){const a=n2(x/u*1.4+o,y/u*1.4)*10;x+=Math.cos(a)*u*.006;y+=Math.sin(a)*u*.006;c.lineTo(x,y)}c.stroke()}}],
-['Gradient',K=>{const{c,W,H,r}=K;const a=r()*6.28,x=Math.cos(a)*W/2,y=Math.sin(a)*H/2;fill(K,lg(c,W/2-x,H/2-y,W/2+x,H/2+y,[col(0),col(.3),col(.65),col(.95)]));
-  c.globalCompositeOperation='soft-light';const g=c.createRadialGradient(W*(.2+r()*.6),H*(.2+r()*.6),0,W/2,H/2,Math.max(W,H));g.addColorStop(0,'#fff');g.addColorStop(1,'#000');fill(K,g)}],
-['Low Poly',K=>{const{c,W,H,u,r,n2}=K;const cs=Math.ceil(8*W/u),rs=Math.ceil(8*H/u),sx=W/cs,sy=H/rs,P=[];
-  for(let j=0;j<=rs;j++)for(let i=0;i<=cs;i++)P.push([i*sx+(i%cs?(r()-.5)*sx*.8:0),j*sy+(j%rs?(r()-.5)*sy*.8:0)]);
-  const tri=(a,b,d)=>{const mx=(a[0]+b[0]+d[0])/3,my=(a[1]+b[1]+d[1])/3,t=(1-my/H)*.75+n2(mx/u*2,my/u*2)*.6+.1;c.fillStyle=c.strokeStyle=col(t);c.beginPath();c.moveTo(...a);c.lineTo(...b);c.lineTo(...d);c.fill();c.stroke()};
-  for(let j=0;j<rs;j++)for(let i=0;i<cs;i++){const p=j*(cs+1)+i,a=P[p],b=P[p+1],d=P[p+cs+1],e=P[p+cs+2];if(r()<.5){tri(a,b,e);tri(a,e,d)}else{tri(a,b,d);tri(b,e,d)}}}],
-['Planet',K=>{const{c,W,H,u,r}=K;sky(K,0,.15);stars(K,350,1);const x=W*(.3+r()*.4),y=H*(.35+r()*.3),R=u*(.22+r()*.12),tilt=-.35+r()*.7;glow(K,x,y,R*1.9,.55);
-  const ring=(a0,a1)=>{c.save();c.translate(x,y);c.rotate(tilt);c.scale(1,.24);c.strokeStyle=col(.8,.75);c.lineWidth=R*.14;c.beginPath();c.arc(0,0,R*1.65,a0,a1);c.stroke();c.restore()};
-  ring(Math.PI,2*Math.PI);const g=c.createRadialGradient(x-R*.4,y-R*.4,R*.1,x,y,R);g.addColorStop(0,col(.92));g.addColorStop(.6,col(.45));g.addColorStop(1,col(.08));dot(c,x,y,R,g);ring(0,Math.PI)}],
-['Rays',K=>{const{c,W,H,u,r}=K;const cx=W*(.2+r()*.6),cy=H*(r()<.5?1.02:.4+r()*.3),n=20+(r()*20|0),D=Math.hypot(W,H)*1.5;
-  for(let k=0;k<n;k++){c.fillStyle=col(k%2?.12:.24);c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,D,k/n*6.2832,(k+1)/n*6.2832+.002);c.fill()}glow(K,cx,cy,u*.9,.75);dot(c,cx,cy,u*.07,col(1))}],
-['City',K=>{const{c,W,H,u,r}=K;sky(K,.04,.48);stars(K,150,.5);const x0=W*(.1+r()*.8),y0=H*(.12+r()*.15);glow(K,x0,y0,u*.3,.9);dot(c,x0,y0,u*.04,col(1));
-  for(let l=0;l<3;l++)for(let x=-u*.02;x<W;){const w=u*(.04+r()*.07),h=u*(.12+r()*.4)*(1.25-l*.25)+H*.12;c.fillStyle=col(.34-l*.14);c.fillRect(x,H-h,w,h);
-    if(l){const ws=w/5;for(let y=H-h+ws;y<H-ws;y+=ws*1.6)for(let k=0;k<2;k++)if(r()<.35){c.fillStyle=col(.95,.85);c.fillRect(x+ws*(1+k*2),y,ws,ws*.8)}}x+=w+u*.004}}],
-['Clouds',K=>{const{c,W,H,u,r}=K;sky(K,.25,.65);const x=W*(.2+r()*.6),y=H*(.2+r()*.1);glow(K,x,y,u*.5,.98);
-  for(let l=0;l<6;l++){const y0=H*(.38+l*.12),cl=col(.92-l*.13);for(let x=-u*.1;x<W+u*.1;x+=u*(.05+r()*.06))dot(c,x,y0+(r()-.5)*u*.05,u*(.06+r()*.07),cl);c.fillRect(0,y0,W,H-y0)}}],
-['Folds',K=>{const{c,W,H,r}=K;const D=Math.hypot(W,H),n=6+(r()*8|0),w=D/n;c.translate(W/2,H/2);c.rotate((r()-.5)*1.4+(r()<.5?0:1.57));
-  for(let k=0;k<n;k++){const x=-D/2+k*w,t=k/n*.8+.08;c.fillStyle=lg(c,x,0,x+w,0,[col(t),col(t+.16)]);c.fillRect(x,-D/2,w+1,D)}}],
-['Mosaic',K=>{const{c,W,H,u,r,n2}=K;fill(K,col(.02));const s=u/(10+(r()*12|0)),g=s*.06,o=r()*9;
-  for(let y=0;y<H;y+=s)for(let x=0;x<W;x+=s){const v=Math.min(1,Math.max(0,n2(x/u*2+o,y/u*2)*1.4+.5));c.fillStyle=col(Math.round(v*6)/6*.85+.1);c.fillRect(x+g,y+g,s-2*g,s-2*g)}}],
-['Horizon',K=>{const{c,W,H,u,r}=K;const hz=H*(.55+r()*.15),sx=W*(.3+r()*.4),R=u*.075;c.fillStyle=lg(c,0,0,0,hz,[col(.08),col(.55),col(.88)]);c.fillRect(0,0,W,hz);
-  glow(K,sx,hz,u*.55,.95);dot(c,sx,hz-R*.35,R,col(1));c.fillStyle=lg(c,0,hz,0,H,[col(.45),col(.06)]);c.fillRect(0,hz,W,H-hz);
-  for(let k=0;k<70;k++){const t=k/70,y=hz+(H-hz)*t**1.5,w=R*(1.5+t*5)*(.4+r());c.fillStyle=col(.97,.7*(1-t));c.fillRect(sx-w/2+(r()-.5)*R*t*3,y,w,u*.003*(1+t*3))}}],
-['Spiral',K=>{const{c,W,H,u,r}=K;fill(K,col(.04));const cx=W*(.3+r()*.4),cy=H*(.3+r()*.4),n=1600,s=Math.hypot(W,H)*.62/Math.sqrt(n),ga=2.39996+(r()-.5)*.004;
-  for(let i=0;i<n;i++){const a=i*ga,d=s*Math.sqrt(i);dot(c,cx+Math.cos(a)*d,cy+Math.sin(a)*d,s*.36*(.3+i/n),col(.97-.75*i/n))}}],
-];
-
-let noise;
-function grain(c,W,H){if(!noise){noise=document.createElement('canvas');noise.width=noise.height=256;const x=noise.getContext('2d'),d=x.createImageData(256,256);
-  for(let i=0;i<d.data.length;i+=4){d.data[i]=d.data[i+1]=d.data[i+2]=Math.random()*255;d.data[i+3]=255}x.putImageData(d,0,0)}
-  c.globalAlpha=.06;c.globalCompositeOperation='overlay';c.fillStyle=c.createPattern(noise,'repeat');c.fillRect(0,0,W,H)}
-
-function draw(cv,W,H,style=S.style){
-  cv.width=W;cv.height=H;const c=cv.getContext('2d'),r=rng(S.seed),tb=Array.from({length:512},r);
-  const vn=x=>{const i=Math.floor(x),f=x-i,s=f*f*(3-2*f);return tb[i&511]+(tb[(i+1)&511]-tb[i&511])*s};
-  const n1=(x,o=5)=>{let v=0,a=.5;for(let k=0;k<o;k++){v+=a*(vn(x)-.5);x=x*2+17.3;a*=.5}return v};
-  const h=(i,j)=>tb[(i+j*57)&511];
-  const vn2=(x,y)=>{const i=Math.floor(x),j=Math.floor(y),f=x-i,g=y-j,s=f*f*(3-2*f),t=g*g*(3-2*g),a=h(i,j)+(h(i+1,j)-h(i,j))*s,b=h(i,j+1)+(h(i+1,j+1)-h(i,j+1))*s;return a+(b-a)*t};
-  const n2=(x,y)=>(vn2(x,y)-.5)*.6+(vn2(x*2+5,y*2+3)-.5)*.3+(vn2(x*4+9,y*4+1)-.5)*.15;
-  const K={c,W,H,u:Math.min(W,H),r,n1,n2};
-  c.save();fill(K,col(0));STY[style][1](K);c.restore();
-  if($('grain').checked){c.save();grain(c,W,H);c.restore()}
-  return c}
-
-function clock(c,W,H,kind){
-  const p=c.getImageData(W/2|0,H*.2|0,1,1).data,dark=p[0]*.3+p[1]*.59+p[2]*.11>150,d=new Date();
-  c.fillStyle=dark?'rgba(0,0,0,.75)':'rgba(255,255,255,.92)';c.textAlign='center';c.textBaseline='middle';
-  const time=d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',hour12:false}),date=d.toLocaleDateString([],{weekday:'long',day:'numeric',month:'long'});
-  const D=kind=='Desktop',f='-apple-system,BlinkMacSystemFont,"SF Pro Display",sans-serif';
-  c.font=`500 ${H*(D?.04:.02)}px ${f}`;c.fillText(date,W/2,H*(D?.12:.11));
-  c.font=`700 ${H*(D?.17:.1)}px ${f}`;c.fillText(time,W/2,H*(D?.24:.19))}
-
-// ---------- UI ----------
-let thumbsDirty=true,queued=false;
-function render(){if(queued)return;queued=true;requestAnimationFrame(()=>{queued=false;
-  RAMP=ramp(S.pal);const dpr=Math.min(2,devicePixelRatio||1);
-  for(const k in DEV){const[w,h,id]=DEV[k],cv=$(id),ph=(cv.clientHeight||300)*dpr,c=draw(cv,Math.round(w*ph/h),Math.round(ph));if($('clock').checked)clock(c,cv.width,cv.height,k)}
-  if(thumbsDirty)[...$('styles').children].forEach((b,i)=>draw(b.firstChild,200,125,i));
-  [...$('styles').children].forEach((b,i)=>b.classList.toggle('on',i==S.style));
-  [...$('swatches').children].forEach(b=>b.classList.toggle('on',b.title==S.pal));
-  $('picker').classList.toggle('on',S.pal=='Custom');
-  thumbsDirty=false})}
-const set=(o,thumbs=true)=>{Object.assign(S,o);thumbsDirty||=thumbs;render()};
-
-$('styles').innerHTML=STY.map(s=>`<button class="st"><canvas width="200" height="125"></canvas>${s[0]}</button>`).join('');
-$('styles').onclick=e=>{const b=e.target.closest('.st');if(b)set({style:[...$('styles').children].indexOf(b)},false)};
-const more=()=>{const c=$('styles').classList.contains('collapsed');$('more').textContent=c?`See all ${STY.length} styles ▾`:'Show fewer ▴'};
-$('more').onclick=()=>{$('styles').classList.toggle('collapsed');more()};more();
-
-$('swatches').innerHTML=Object.keys(PAL).map(k=>`<button class="sw" title="${k}" style="background:linear-gradient(135deg,${PAL[k].join(',')})"></button>`).join('');
-$('swatches').onclick=e=>{const b=e.target.closest('.sw');if(b)set({pal:b.title})};
-
-// colour picker: S.hsl is the source of truth, every control syncs from it
-const wc=$('wc').getContext('2d');
-if(wc.createConicGradient){const g=wc.createConicGradient(0,132,132);for(let i=0;i<=12;i++)g.addColorStop(i/12,`hsl(${i*30} 100% 50%)`);wc.fillStyle=g;wc.fillRect(0,0,264,264)}
-{const g=wc.createRadialGradient(132,132,0,132,132,132);g.addColorStop(0,'#fff');g.addColorStop(1,'rgb(255 255 255/0)');wc.fillStyle=g;wc.fillRect(0,0,264,264)}
-function setColor(hsl,from){
-  S.hsl=hsl.map(v=>Math.round(v*10)/10);const[h,s,l]=S.hsl,rgb=hsl2rgb(h,s,l).map(Math.round),hex=rgb2hex(rgb);
-  if(from!='hex')$('hex').value=hex;if(from!='rgb')['cr','cg','cb'].forEach((id,i)=>$(id).value=rgb[i]);$('native').value=hex;
-  [['sh',h],['ss',s],['sl',l]].forEach(([id,v])=>{$(id).value=v;$('v'+id[1]).textContent=Math.round(v)});
-  $('sh').style.background='linear-gradient(90deg,'+[0,60,120,180,240,300,360].map(x=>`hsl(${x} ${s}% ${l}%)`)+')';
-  $('ss').style.background=`linear-gradient(90deg,hsl(${h} 0% ${l}%),hsl(${h} 100% ${l}%))`;
-  $('sl').style.background=`linear-gradient(90deg,#000,hsl(${h} ${s}% 50%),#fff)`;
-  const a=h*Math.PI/180;Object.assign($('mark').style,{left:66+Math.cos(a)*s/100*66+'px',top:66+Math.sin(a)*s/100*66+'px',background:hex});
-  if(from)set({pal:'Custom'})}
-const fromRGB=(rgb,from)=>setColor(rgb2hsl(...rgb),from);
-$('hex').oninput=e=>{let v=e.target.value.trim();if(v[0]!='#')v='#'+v;if(/^#[0-9a-f]{3}$/i.test(v))v='#'+[...v.slice(1)].map(x=>x+x).join('');if(/^#[0-9a-f]{6}$/i.test(v))fromRGB(hex2rgb(v),'hex')};
-['cr','cg','cb'].forEach(id=>$(id).oninput=()=>fromRGB(['cr','cg','cb'].map(i=>Math.min(255,Math.max(0,+$(i).value||0))),'rgb'));
-['sh','ss','sl'].forEach(id=>$(id).oninput=()=>setColor(['sh','ss','sl'].map(i=>+$(i).value),'slider'));
-$('native').oninput=e=>fromRGB(hex2rgb(e.target.value),'native');
-const wheel=e=>{const b=$('wheel').getBoundingClientRect(),dx=e.clientX-b.left-66,dy=e.clientY-b.top-66;setColor([(Math.atan2(dy,dx)*180/Math.PI+360)%360,Math.min(100,Math.hypot(dx,dy)/66*100),S.hsl[2]],'wheel')};
-$('wheel').onpointerdown=e=>{$('wheel').setPointerCapture(e.pointerId);wheel(e);$('wheel').onpointermove=wheel};
-$('wheel').onpointerup=()=>$('wheel').onpointermove=null;
-// EyeDropper samples anywhere on screen (Chromium); elsewhere fall back to the OS picker, which has its own eyedropper
-$('drop').onclick=async()=>{if(!window.EyeDropper)return $('native').click();try{fromRGB(hex2rgb((await new EyeDropper().open()).sRGBHex),'drop')}catch{}};
-setColor(S.hsl);
-
-$('dark').onclick=()=>{$('dark').classList.add('on');$('light').classList.remove('on');set({inv:false})};
-$('light').onclick=()=>{$('light').classList.add('on');$('dark').classList.remove('on');set({inv:true})};
-$('grain').onchange=()=>set({});$('clock').onchange=()=>set({},false);
-$('remix').onclick=()=>set({seed:Math.random()*1e9|0});
-
-function dlButtons(){const q=QUAL[S.q];$('dl').innerHTML=Object.keys(DEV).map(k=>`<button data-k="${k}">${k}<small>${Math.round(DEV[k][0]*q)}×${Math.round(DEV[k][1]*q)}</small></button>`).join('');
-  $('quality').innerHTML=Object.keys(QUAL).map(k=>`<button class="${k==S.q?'on':''}">${k}</button>`).join('')}
-$('quality').onclick=e=>{if(e.target.tagName=='BUTTON'){S.q=e.target.textContent;dlButtons()}};
-$('dl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k,q=QUAL[S.q],old=b.innerHTML;b.textContent='Rendering…';
-  setTimeout(()=>{const cv=document.createElement('canvas');draw(cv,Math.round(DEV[k][0]*q),Math.round(DEV[k][1]*q));
-    cv.toBlob(blob=>{if(!blob){b.textContent='Too large for this browser — try 4K';return setTimeout(()=>b.innerHTML=old,3000)}
-      const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`wallpaper-${STY[S.style][0]}-${k}-${S.q}-${S.seed}.png`.toLowerCase().replace(/ /g,'-');a.click();b.innerHTML=old},'image/png')},30)};
-dlButtons();
-addEventListener('resize',()=>set({},false));
-render();
-</script>
+</main>
+<div id="toast"></div>
+<script src="engine.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
