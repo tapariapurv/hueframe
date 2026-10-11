@@ -1,6 +1,7 @@
 <p align="center"><img src="logo.svg" width="72" alt="Hueframe logo"></p>
 <h1 align="center">Hueframe</h1>
 <p align="center">Generate 4K–8K wallpapers for desktop, iPad and iPhone — in any colour, matched to your device.</p>
+<p align="center"><a href="https://hueframe.vercel.app"><b>hueframe.vercel.app</b></a></p>
 
 ## Features
 
@@ -10,31 +11,6 @@
 - **Exports up to 8K**: 7680×4320 desktop, 2640×5736 iPhone, 4128×5504 iPad, as lossless PNG.
 - **Share links**: every wallpaper is a URL you can copy and send.
 - Light and dark themes, keyboard shortcuts (`Space` for a new variation, `←` `→` to switch styles).
-
-## Run locally
-
-No build step and no dependencies. Open `index.html`, or serve the folder:
-
-```sh
-npx serve .
-```
-
-## Project structure
-
-| File | Purpose |
-| --- | --- |
-| `index.html` | Markup and styles |
-| `engine.js` | Palettes, colour maths and the 30 canvas styles |
-| `app.js` | Discover page, editor, colour picker, export |
-| `logo.svg` | Logo and favicon |
-
-## Adding a style
-
-Append `['Name', K => { ... }]` to `STY` in `engine.js`. `K` gives you the canvas context `c`, size `W`/`H`, unit `u` (shorter side), seeded random `r()`, noise `n1`/`n2`, and `col(t, alpha)` returns the palette colour at `t` from 0 (dark) to 1 (light).
-
-## Deploy
-
-Static site, deploys to Vercel with zero config.
 
 ## Notes
 
